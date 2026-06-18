@@ -16,9 +16,7 @@ class EducationController extends Controller
             ->where('is_active', true)
             ->with(['contents' => fn ($query) => $query
                 ->where('is_active', true)
-                ->where(fn ($published) => $published
-                    ->whereNull('published_at')
-                    ->orWhere('published_at', '<=', now()))
+                ->published()
                 ->orderByDesc('published_at')])
             ->orderBy('sort_order')
             ->get();
@@ -28,9 +26,12 @@ class EducationController extends Controller
 
     public function show(EducationContent $educationContent): JsonResponse
     {
+        $educationContent->loadMissing('category');
+
         abort_unless(
             $educationContent->is_active &&
-            (! $educationContent->published_at || $educationContent->published_at->isPast()),
+            $educationContent->category?->is_active &&
+            $educationContent->published_at?->isPast(),
             404,
         );
 
@@ -46,7 +47,7 @@ class EducationController extends Controller
         return response()->json([
             'data' => EducationContent::query()
                 ->with('category')
-                ->where('is_active', true)
+                ->visible()
                 ->where(fn ($query) => $query
                     ->where('title', 'like', '%'.$validated['q'].'%')
                     ->orWhere('summary', 'like', '%'.$validated['q'].'%'))

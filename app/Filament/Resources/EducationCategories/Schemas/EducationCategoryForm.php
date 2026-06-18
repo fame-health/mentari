@@ -23,6 +23,7 @@ class EducationCategoryForm
                     ->numeric()
                     ->default(0),
                 Toggle::make('is_active')
+                    ->default(true)
                     ->required(),
             ]);
     }

@@ -44,8 +44,10 @@ class EducationContentForm
                     ->default(null),
                 ColorPicker::make('accent_color')
                     ->default(null),
-                DateTimePicker::make('published_at'),
+                DateTimePicker::make('published_at')
+                    ->default(fn () => now()),
                 Toggle::make('is_active')
+                    ->default(true)
                     ->required(),
             ]);
     }
