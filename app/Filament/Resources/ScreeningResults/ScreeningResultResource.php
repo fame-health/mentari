@@ -4,6 +4,7 @@ namespace App\Filament\Resources\ScreeningResults;
 
 use App\Filament\Resources\ScreeningResults\Pages\CreateScreeningResult;
 use App\Filament\Resources\ScreeningResults\Pages\EditScreeningResult;
+use App\Filament\Resources\ScreeningResults\Pages\ListSchoolScreeningResults;
 use App\Filament\Resources\ScreeningResults\Pages\ListScreeningResults;
 use App\Filament\Resources\ScreeningResults\Pages\ViewScreeningResult;
 use App\Filament\Resources\ScreeningResults\Schemas\ScreeningResultForm;
@@ -57,6 +58,7 @@ class ScreeningResultResource extends Resource
         return [
             'index' => ListScreeningResults::route('/'),
             'create' => CreateScreeningResult::route('/create'),
+            'school' => ListSchoolScreeningResults::route('/school/{school}'),
             'view' => ViewScreeningResult::route('/{record}'),
             'edit' => EditScreeningResult::route('/{record}/edit'),
         ];
