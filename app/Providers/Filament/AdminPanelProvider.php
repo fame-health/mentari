@@ -2,14 +2,15 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Dashboard;
 use App\Filament\Widgets\MentariStatsOverview;
 use App\Filament\Widgets\MoodTrendChart;
 use App\Filament\Widgets\RecentRiskAlerts;
+use App\Filament\Widgets\RiskLevelChart;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -32,17 +33,21 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->brandName('MENTARI Admin')
             ->colors([
-                'primary' => Color::Orange,
+                'primary' => Color::Pink,
+                'danger' => Color::Red,
+                'info' => Color::Sky,
+                'success' => Color::Emerald,
+                'warning' => Color::Amber,
             ])
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 MentariStatsOverview::class,
                 MoodTrendChart::class,
+                RiskLevelChart::class,
                 RecentRiskAlerts::class,
                 AccountWidget::class,
             ])

@@ -20,7 +20,7 @@ class RecommendationResource extends Resource
 {
     protected static ?string $model = Recommendation::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLightBulb;
 
     protected static string|\UnitEnum|null $navigationGroup = 'Konten';
 

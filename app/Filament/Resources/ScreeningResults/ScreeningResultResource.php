@@ -20,7 +20,7 @@ class ScreeningResultResource extends Resource
 {
     protected static ?string $model = ScreeningResult::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentChartBar;
 
     protected static string|\UnitEnum|null $navigationGroup = 'Screening';
 

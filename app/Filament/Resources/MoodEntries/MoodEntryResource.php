@@ -20,7 +20,7 @@ class MoodEntryResource extends Resource
 {
     protected static ?string $model = MoodEntry::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFaceSmile;
 
     protected static string|\UnitEnum|null $navigationGroup = 'Mood';
 

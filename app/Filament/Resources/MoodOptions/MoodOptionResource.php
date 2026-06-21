@@ -20,7 +20,7 @@ class MoodOptionResource extends Resource
 {
     protected static ?string $model = MoodOption::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSwatch;
 
     protected static string|\UnitEnum|null $navigationGroup = 'Mood';
 

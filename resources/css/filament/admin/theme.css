@@ -1,0 +1,199 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+:root {
+    --mentari-surface: 255 255 255;
+    --mentari-ink: 15 23 42;
+    --mentari-primary-soft: color-mix(in oklab, var(--primary-500) 14%, transparent);
+    --mentari-primary-ring: color-mix(in oklab, var(--primary-500) 38%, transparent);
+    --mentari-primary-shadow: color-mix(in oklab, var(--primary-600) 24%, transparent);
+}
+
+.fi-body.fi-panel-admin {
+    background:
+        radial-gradient(circle at top left, rgb(255 247 237 / 0.88), transparent 34rem),
+        linear-gradient(135deg, rgb(255 251 235 / 0.95), rgb(248 250 252) 42%, rgb(240 249 255 / 0.9));
+    color: rgb(var(--mentari-ink));
+}
+
+.fi-panel-admin .fi-main {
+    padding-top: 1.75rem;
+}
+
+.fi-panel-admin .fi-topbar,
+.fi-panel-admin .fi-sidebar {
+    backdrop-filter: blur(18px);
+}
+
+.fi-panel-admin .fi-sidebar {
+    border-right: 1px solid var(--mentari-primary-soft);
+    background:
+        linear-gradient(180deg, rgb(255 247 237 / 0.94), rgb(255 255 255 / 0.92)),
+        rgb(255 255 255 / 0.92);
+}
+
+.fi-panel-admin .fi-sidebar-header {
+    border-bottom: 1px solid var(--mentari-primary-soft);
+}
+
+.fi-panel-admin .fi-sidebar-item-active .fi-sidebar-item-btn,
+.fi-panel-admin .fi-sidebar-item-btn:hover {
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
+    color: white;
+    box-shadow: 0 16px 34px var(--mentari-primary-shadow);
+}
+
+.fi-panel-admin .fi-sidebar-item-active .fi-sidebar-item-icon,
+.fi-panel-admin .fi-sidebar-item-btn:hover .fi-sidebar-item-icon,
+.fi-panel-admin .fi-sidebar-item-active .fi-sidebar-item-label,
+.fi-panel-admin .fi-sidebar-item-btn:hover .fi-sidebar-item-label {
+    color: white;
+}
+
+.fi-panel-admin .fi-topbar-item.fi-active .fi-topbar-item-btn,
+.fi-panel-admin .fi-topbar-item-btn:hover,
+.fi-panel-admin .fi-tabs-item.fi-active,
+.fi-panel-admin .fi-btn-group > .fi-btn.fi-active {
+    background: var(--mentari-primary-soft);
+    color: var(--primary-700);
+}
+
+.fi-panel-admin .fi-tabs-item.fi-active .fi-tabs-item-label,
+.fi-panel-admin .fi-tabs-item:hover .fi-tabs-item-label,
+.fi-panel-admin .fi-btn:not(.fi-color):hover,
+.fi-panel-admin .fi-link:hover {
+    color: var(--primary-700);
+}
+
+.fi-panel-admin .fi-btn:focus-visible,
+.fi-panel-admin .fi-link:focus-visible,
+.fi-panel-admin .fi-tabs-item:focus-visible,
+.fi-panel-admin .fi-sidebar-item-btn:focus-visible,
+.fi-panel-admin .fi-topbar-item-btn:focus-visible {
+    outline: 2px solid var(--mentari-primary-ring);
+    outline-offset: 2px;
+}
+
+.fi-panel-admin .fi-page-header-main-ctn {
+    gap: 1.25rem;
+}
+
+.fi-panel-admin .fi-header {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--mentari-primary-soft);
+    border-radius: 1rem;
+    padding: 1.35rem;
+    background:
+        linear-gradient(135deg, rgb(255 255 255 / 0.95), rgb(255 247 237 / 0.82)),
+        rgb(var(--mentari-surface) / 0.92);
+    box-shadow: 0 18px 46px rgb(15 23 42 / 0.08);
+}
+
+.fi-panel-admin .fi-header::after {
+    position: absolute;
+    inset: auto -2rem -5rem auto;
+    width: 14rem;
+    height: 14rem;
+    border-radius: 999px;
+    background: var(--mentari-primary-soft);
+    content: '';
+    pointer-events: none;
+    z-index: 0;
+}
+
+.fi-panel-admin .fi-header > * {
+    position: relative;
+    z-index: 1;
+}
+
+.fi-panel-admin .fi-header-heading {
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.fi-panel-admin .fi-header-subheading {
+    max-width: 46rem;
+    color: rgb(71 85 105);
+}
+
+.fi-panel-admin .fi-wi-stats-overview-stat,
+.fi-panel-admin .fi-section,
+.fi-panel-admin .fi-ta-ctn {
+    border: 1px solid rgb(226 232 240 / 0.86);
+    border-radius: 0.875rem;
+    background: rgb(255 255 255 / 0.9);
+    box-shadow: 0 14px 34px rgb(15 23 42 / 0.07);
+}
+
+.fi-panel-admin .fi-wi-stats-overview-stat {
+    overflow: hidden;
+    transition:
+        transform 180ms ease,
+        box-shadow 180ms ease,
+        border-color 180ms ease;
+}
+
+.fi-panel-admin .fi-wi-stats-overview-stat:hover {
+    border-color: var(--mentari-primary-ring);
+    box-shadow: 0 20px 42px rgb(15 23 42 / 0.1);
+    transform: translateY(-2px);
+}
+
+.fi-panel-admin .fi-wi-stats-overview-stat-label {
+    color: rgb(71 85 105);
+    font-weight: 700;
+}
+
+.fi-panel-admin .fi-wi-stats-overview-stat-value {
+    color: rgb(15 23 42);
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.fi-panel-admin .fi-wi-chart .fi-section-content {
+    padding-top: 0.75rem;
+}
+
+.fi-panel-admin .fi-section-header {
+    border-bottom-color: rgb(226 232 240 / 0.78);
+}
+
+.fi-panel-admin .fi-section-header-heading {
+    font-weight: 800;
+}
+
+.fi-panel-admin .fi-section-header-description {
+    color: rgb(100 116 139);
+}
+
+.fi-panel-admin .fi-ta-header {
+    background: linear-gradient(135deg, rgb(255 247 237 / 0.72), rgb(255 255 255 / 0.9));
+}
+
+.dark .fi-body.fi-panel-admin {
+    background:
+        radial-gradient(circle at top left, rgb(124 45 18 / 0.52), transparent 34rem),
+        linear-gradient(135deg, rgb(15 23 42), rgb(30 41 59));
+}
+
+.dark .fi-panel-admin .fi-header,
+.dark .fi-panel-admin .fi-wi-stats-overview-stat,
+.dark .fi-panel-admin .fi-section,
+.dark .fi-panel-admin .fi-ta-ctn,
+.dark .fi-panel-admin .fi-sidebar {
+    border-color: rgb(148 163 184 / 0.16);
+    background: rgb(15 23 42 / 0.86);
+}
+
+.dark .fi-panel-admin .fi-header-subheading,
+.dark .fi-panel-admin .fi-section-header-description,
+.dark .fi-panel-admin .fi-wi-stats-overview-stat-label {
+    color: rgb(203 213 225);
+}
+
+.dark .fi-panel-admin .fi-wi-stats-overview-stat-value {
+    color: rgb(248 250 252);
+}

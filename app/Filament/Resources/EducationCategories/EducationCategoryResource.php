@@ -20,7 +20,7 @@ class EducationCategoryResource extends Resource
 {
     protected static ?string $model = EducationCategory::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolderOpen;
 
     protected static string|\UnitEnum|null $navigationGroup = 'Konten';
 

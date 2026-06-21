@@ -20,7 +20,7 @@ class EducationContentResource extends Resource
 {
     protected static ?string $model = EducationContent::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
 
     protected static string|\UnitEnum|null $navigationGroup = 'Konten';
 

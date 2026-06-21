@@ -20,7 +20,7 @@ class CommunityPostLikeResource extends Resource
 {
     protected static ?string $model = CommunityPostLike::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedHandThumbUp;
 
     protected static string|\UnitEnum|null $navigationGroup = 'Komunitas';
 

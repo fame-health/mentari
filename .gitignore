@@ -1,6 +1,6 @@
 /.phpunit.cache
 /node_modules
-/public/build
+http://127.0.0.1:8000/admin/screening-answers
 /public/hot
 /public/storage
 /storage/*.key

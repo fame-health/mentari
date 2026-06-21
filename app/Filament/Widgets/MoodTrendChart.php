@@ -4,13 +4,26 @@ namespace App\Filament\Widgets;
 
 use App\Models\MoodEntry;
 use Carbon\CarbonPeriod;
+use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 
 class MoodTrendChart extends ChartWidget
 {
+    protected static ?int $sort = 2;
+
     protected ?string $heading = 'Tren Mood 14 Hari';
 
-    protected int|string|array $columnSpan = 'full';
+    protected ?string $description = 'Rata-rata skor mood siswa dari check-in harian.';
+
+    protected ?string $pollingInterval = '10s';
+
+    protected ?string $maxHeight = '320px';
+
+    protected int|string|array $columnSpan = [
+        'default' => 1,
+        'md' => 6,
+        'xl' => 8,
+    ];
 
     protected function getData(): array
     {
@@ -35,8 +48,12 @@ class MoodTrendChart extends ChartWidget
                         ->all(),
                     'borderColor' => '#f97316',
                     'backgroundColor' => 'rgba(249, 115, 22, 0.15)',
+                    'pointBackgroundColor' => '#fb923c',
+                    'pointBorderColor' => '#fff7ed',
+                    'pointRadius' => 4,
+                    'pointHoverRadius' => 6,
                     'fill' => true,
-                    'tension' => 0.35,
+                    'tension' => 0.42,
                 ],
             ],
             'labels' => $period->map(fn ($date): string => $date->format('d M'))->all(),
@@ -46,5 +63,34 @@ class MoodTrendChart extends ChartWidget
     protected function getType(): string
     {
         return 'line';
+    }
+
+    protected function getOptions(): array|RawJs|null
+    {
+        return [
+            'maintainAspectRatio' => false,
+            'plugins' => [
+                'legend' => [
+                    'display' => false,
+                ],
+                'tooltip' => [
+                    'displayColors' => false,
+                ],
+            ],
+            'scales' => [
+                'x' => [
+                    'grid' => [
+                        'display' => false,
+                    ],
+                ],
+                'y' => [
+                    'beginAtZero' => true,
+                    'suggestedMax' => 5,
+                    'ticks' => [
+                        'precision' => 0,
+                    ],
+                ],
+            ],
+        ];
     }
 }

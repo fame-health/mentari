@@ -20,7 +20,7 @@ class ScreeningQuestionResource extends Resource
 {
     protected static ?string $model = ScreeningQuestion::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQuestionMarkCircle;
 
     protected static string|\UnitEnum|null $navigationGroup = 'Screening';
 

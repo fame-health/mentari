@@ -20,7 +20,7 @@ class RiskAlertResource extends Resource
 {
     protected static ?string $model = RiskAlert::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldExclamation;
 
     protected static string|\UnitEnum|null $navigationGroup = 'Keselamatan';
 

@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class RecentRiskAlerts extends TableWidget
 {
+    protected static ?int $sort = 4;
+
     protected static ?string $heading = 'Alert Risiko Terbaru';
 
     protected int|string|array $columnSpan = 'full';
@@ -23,6 +25,7 @@ class RecentRiskAlerts extends TableWidget
                 ->with('user')
                 ->whereNull('dismissed_at')
                 ->latest())
+            ->poll('10s')
             ->columns([
                 TextColumn::make('user.name')
                     ->label('Siswa')
@@ -42,6 +45,12 @@ class RecentRiskAlerts extends TableWidget
                     ->label('Dibuat')
                     ->since(),
             ])
+            ->striped()
+            ->paginated([5, 10, 25])
+            ->defaultPaginationPageOption(5)
+            ->emptyStateIcon('heroicon-o-shield-check')
+            ->emptyStateHeading('Tidak ada alert aktif')
+            ->emptyStateDescription('Semua alert risiko sudah ditangani atau belum ada alert baru.')
             ->recordActions([
                 Action::make('buka')
                     ->label('Buka')
