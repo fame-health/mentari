@@ -14,7 +14,7 @@ class AdminEducationContentViewTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_content_detail_has_clear_reading_and_publication_sections(): void
+    public function test_content_detail_uses_compact_readable_sections(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
         $category = EducationCategory::create([
@@ -35,10 +35,10 @@ class AdminEducationContentViewTest extends TestCase
         Livewire::actingAs($admin)
             ->test(ViewEducationContent::class, ['record' => $content->getRouteKey()])
             ->assertOk()
+            ->assertSee('Informasi konten')
             ->assertSee('Ringkasan')
-            ->assertSee('Status &amp; publikasi', escape: false)
-            ->assertSee('Isi konten')
-            ->assertSee('Media &amp; informasi', escape: false)
+            ->assertSee('Isi artikel')
+            ->assertSee('Riwayat')
             ->assertSee('Ringkasan yang mudah dipahami.')
             ->assertSee('Kenali stres')
             ->assertSee('Tayang')

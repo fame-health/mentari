@@ -13,9 +13,14 @@ class Dashboard extends BaseDashboard
 {
     protected static ?string $title = 'Dashboard MENTARI';
 
+    public function getHeading(): string|Htmlable|null
+    {
+        return null;
+    }
+
     public function getSubheading(): string|Htmlable|null
     {
-        return 'Monitoring kesehatan mental siswa, mood harian, screening DASS-21, dan alert risiko secara real-time.';
+        return null;
     }
 
     public function getColumns(): int|array

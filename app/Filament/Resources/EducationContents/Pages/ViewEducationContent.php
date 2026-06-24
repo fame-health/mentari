@@ -13,7 +13,11 @@ class ViewEducationContent extends ViewRecord
 {
     protected static string $resource = EducationContentResource::class;
 
-    protected Width|string|null $maxContentWidth = Width::ScreenTwoExtraLarge;
+    protected Width|string|null $maxContentWidth = Width::SevenExtraLarge;
+
+    protected array $extraBodyAttributes = [
+        'class' => 'mentari-content-view-page',
+    ];
 
     public function getTitle(): string|Htmlable
     {

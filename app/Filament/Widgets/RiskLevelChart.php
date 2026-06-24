@@ -2,7 +2,7 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\RiskAlert;
+use App\Models\ScreeningResult;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 
@@ -12,7 +12,7 @@ class RiskLevelChart extends ChartWidget
 
     protected ?string $heading = 'Komposisi Alert Aktif';
 
-    protected ?string $description = 'Distribusi level risiko yang belum ditangani.';
+    protected ?string $description = 'Distribusi status screening terbaru siswa.';
 
     protected ?string $pollingInterval = '10s';
 
@@ -26,11 +26,29 @@ class RiskLevelChart extends ChartWidget
 
     protected function getData(): array
     {
-        $counts = RiskAlert::query()
-            ->whereNull('dismissed_at')
-            ->selectRaw('level, COUNT(*) as aggregate_count')
-            ->groupBy('level')
-            ->pluck('aggregate_count', 'level');
+        $levelExpression = <<<'SQL'
+CASE
+    WHEN depression_severity IN ('severe', 'extremely_severe')
+        OR anxiety_severity IN ('severe', 'extremely_severe')
+        OR stress_severity IN ('severe', 'extremely_severe')
+    THEN 'urgent'
+    WHEN depression_severity = 'moderate'
+        OR anxiety_severity = 'moderate'
+        OR stress_severity = 'moderate'
+    THEN 'attention'
+    ELSE 'normal'
+END
+SQL;
+
+        $latestScreeningIds = ScreeningResult::query()
+            ->selectRaw('MAX(id)')
+            ->groupBy('user_id');
+
+        $counts = ScreeningResult::query()
+            ->whereIn('id', $latestScreeningIds)
+            ->selectRaw("{$levelExpression} as alert_level, COUNT(*) as aggregate_count")
+            ->groupBy('alert_level')
+            ->pluck('aggregate_count', 'alert_level');
 
         return [
             'datasets' => [
@@ -38,7 +56,7 @@ class RiskLevelChart extends ChartWidget
                     'data' => [
                         (int) ($counts['urgent'] ?? 0),
                         (int) ($counts['attention'] ?? 0),
-                        (int) ($counts['stable'] ?? 0),
+                        (int) ($counts['normal'] ?? 0),
                     ],
                     'backgroundColor' => ['#ef4444', '#f59e0b', '#10b981'],
                     'borderColor' => '#ffffff',
@@ -46,7 +64,7 @@ class RiskLevelChart extends ChartWidget
                     'hoverOffset' => 8,
                 ],
             ],
-            'labels' => ['Urgent', 'Attention', 'Stable'],
+            'labels' => ['Urgent', 'Attention', 'Normal'],
         ];
     }
 
