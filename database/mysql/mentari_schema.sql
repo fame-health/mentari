@@ -26,6 +26,7 @@ CREATE TABLE users (
     level VARCHAR(50) NULL,
     avatar_initial CHAR(1) NULL,
     streak_days INT UNSIGNED NOT NULL DEFAULT 0,
+    last_activity_date DATE NULL,
     can_take_screening BOOLEAN NOT NULL DEFAULT TRUE,
     remember_token VARCHAR(100) NULL,
     created_at TIMESTAMP NULL DEFAULT NULL,

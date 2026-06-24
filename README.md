@@ -142,6 +142,7 @@ Accept: application/json
 
 | Method | Endpoint | Fungsi |
 |---|---|---|
+| GET | `/schools` | Daftar sekolah untuk pilihan saat registrasi |
 | POST | `/auth/register` | Registrasi siswa |
 | POST | `/auth/login` | Login dan mendapatkan token |
 | GET | `/auth/me` | Data pengguna login |
@@ -149,6 +150,7 @@ Accept: application/json
 | PUT | `/auth/password` | Mengganti password |
 | POST | `/auth/logout` | Menghapus token aktif |
 | GET | `/dashboard` | Ringkasan halaman utama Android |
+| POST | `/streak/check-in` | Mencatat aktivitas harian dan mengembalikan streak |
 | GET | `/mood-options` | Daftar pilihan mood |
 | GET | `/mood-entries` | Riwayat mood pengguna |
 | POST | `/mood-entries` | Membuat/memperbarui mood harian |
@@ -167,7 +169,19 @@ Accept: application/json
 | GET | `/risk-alerts` | Daftar alert milik pengguna |
 | PATCH | `/risk-alerts/{id}/dismiss` | Admin menandai alert sudah dibaca |
 
-Semua endpoint selain register dan login memerlukan `Authorization: Bearer`.
+Semua endpoint selain daftar sekolah, register, dan login memerlukan `Authorization: Bearer`.
+
+### Streak harian
+
+Aplikasi dapat memanggil `POST /api/v1/streak/check-in` saat startup atau kembali aktif.
+Endpoint ini idempotent: pemanggilan berulang pada tanggal yang sama tidak menambah streak.
+Semua request API yang menggunakan bearer token juga otomatis mencatat aktivitas, sehingga
+request dashboard saat aplikasi dibuka sudah cukup untuk memperbarui streak.
+
+- Aktivitas pertama menghasilkan streak `1`.
+- Aktivitas pada hari berikutnya menambah streak sebanyak `1`.
+- Jika satu hari kalender terlewat, aktivitas berikutnya memulai kembali streak dari `1`.
+- Perhitungan batas hari menggunakan timezone `Asia/Jakarta` dari `APP_TIMEZONE`.
 
 ## Format Submit Screening
 

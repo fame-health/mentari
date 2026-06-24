@@ -34,6 +34,7 @@ class UserFactory extends Factory
             'level' => fake()->randomElement(['VII', 'VIII', 'IX', 'X', 'XI', 'XII']),
             'avatar_initial' => fake()->randomLetter(),
             'streak_days' => 0,
+            'last_activity_date' => null,
             'remember_token' => Str::random(10),
         ];
     }

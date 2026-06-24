@@ -27,6 +27,7 @@ class User extends Authenticatable implements FilamentUser
         'level',
         'avatar_initial',
         'streak_days',
+        'last_activity_date',
         'can_take_screening',
     ];
 
@@ -41,6 +42,7 @@ class User extends Authenticatable implements FilamentUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'streak_days' => 'integer',
+            'last_activity_date' => 'date:Y-m-d',
             'can_take_screening' => 'boolean',
         ];
     }

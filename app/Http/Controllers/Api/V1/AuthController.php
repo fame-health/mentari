@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\DailyStreakService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -13,10 +14,12 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    public function __construct(private readonly DailyStreakService $dailyStreakService) {}
+
     public function register(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'school_id' => ['nullable', 'exists:schools,id'],
+            'school_id' => ['required', 'integer', 'exists:schools,id'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::min(8)],
@@ -33,6 +36,7 @@ class AuthController extends Controller
             'level' => $validated['level'] ?? null,
             'avatar_initial' => Str::upper(Str::substr($validated['name'], 0, 1)),
         ]);
+        $this->dailyStreakService->recordActivity($user);
 
         return response()->json([
             'message' => 'Registrasi berhasil.',
@@ -58,6 +62,8 @@ class AuthController extends Controller
                 'email' => ['Email atau password tidak sesuai.'],
             ]);
         }
+
+        $this->dailyStreakService->recordActivity($user);
 
         $deviceName = $validated['device_name'] ?? 'android';
         $user->tokens()->where('name', $deviceName)->delete();
