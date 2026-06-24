@@ -16,16 +16,12 @@ class EducationCategoriesTable
     {
         return $table
             ->columns([
-                TextColumn::make('slug')
-                    ->searchable(),
                 TextColumn::make('title')
+                    ->label('Nama kategori')
+                    ->description(fn ($record): ?string => $record->description)
                     ->searchable(),
-                TextColumn::make('description')
-                    ->searchable(),
-                TextColumn::make('sort_order')
-                    ->numeric()
-                    ->sortable(),
                 IconColumn::make('is_active')
+                    ->label('Status')
                     ->boolean(),
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -39,6 +35,7 @@ class EducationCategoriesTable
             ->filters([
                 //
             ])
+            ->defaultSort('sort_order')
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),

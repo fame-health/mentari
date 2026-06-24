@@ -13,7 +13,13 @@ class ListEducationCategories extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->label('Tambah kategori')
+                ->icon('heroicon-o-plus')
+                ->modalHeading('Tambah kategori edukasi')
+                ->modalDescription('Slug dan urutan kategori akan dibuat otomatis.')
+                ->modalSubmitActionLabel('Simpan kategori')
+                ->createAnother(false),
         ];
     }
 }

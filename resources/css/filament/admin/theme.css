@@ -173,6 +173,143 @@
     background: linear-gradient(135deg, rgb(255 247 237 / 0.72), rgb(255 255 255 / 0.9));
 }
 
+.mentari-content-form-page .fi-header {
+    background:
+        radial-gradient(circle at 92% 18%, var(--mentari-primary-soft), transparent 12rem),
+        linear-gradient(135deg, rgb(255 255 255 / 0.98), rgb(255 247 237 / 0.9));
+}
+
+.mentari-content-form-page .fi-header-heading {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+.mentari-content-form-grid {
+    align-items: start;
+}
+
+.mentari-content-form-page .mentari-editor-section {
+    overflow: hidden;
+    border-color: rgb(226 232 240 / 0.95);
+    background: rgb(255 255 255 / 0.95);
+    box-shadow: 0 12px 30px rgb(15 23 42 / 0.055);
+    transition:
+        border-color 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.mentari-content-form-page .mentari-editor-section:hover {
+    border-color: var(--mentari-primary-ring);
+    box-shadow: 0 18px 36px rgb(15 23 42 / 0.075);
+}
+
+.mentari-content-form-page .mentari-editor-section--primary {
+    border-top: 3px solid var(--primary-500);
+}
+
+.mentari-content-form-page .mentari-editor-section--publish {
+    border-top: 3px solid rgb(14 165 233);
+    background:
+        linear-gradient(180deg, rgb(240 249 255 / 0.72), rgb(255 255 255 / 0.96) 36%);
+}
+
+.mentari-content-form-page .mentari-editor-section--compact {
+    background:
+        linear-gradient(180deg, rgb(255 251 235 / 0.75), rgb(255 255 255 / 0.96) 38%);
+}
+
+.mentari-content-form-page .mentari-editor-section .fi-section-header-heading {
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+}
+
+.mentari-content-form-page .fi-fo-field-label-content {
+    color: rgb(30 41 59);
+    font-weight: 700;
+}
+
+.mentari-content-form-page .fi-fo-field > .fi-fo-field-content-col > .fi-sc-text {
+    color: rgb(100 116 139);
+    line-height: 1.5;
+}
+
+.mentari-content-form-page .fi-fo-toggle-buttons {
+    flex-wrap: wrap;
+}
+
+.mentari-content-form-page .mentari-main-content-editor .fi-fo-rich-editor-content {
+    min-height: 18rem;
+}
+
+.mentari-content-form-page .mentari-content-wizard {
+    width: 100%;
+    max-width: 72rem;
+    margin-inline: auto;
+}
+
+.mentari-content-form-page .mentari-content-wizard .fi-sc-wizard-header {
+    overflow: hidden;
+    border: 1px solid rgb(226 232 240 / 0.9);
+    background: rgb(255 255 255 / 0.94);
+    box-shadow: 0 12px 30px rgb(15 23 42 / 0.06);
+}
+
+.mentari-content-form-page .mentari-content-wizard .fi-sc-wizard-header-step.fi-active {
+    background: linear-gradient(135deg, var(--mentari-primary-soft), transparent);
+}
+
+.mentari-content-form-page .mentari-content-wizard .fi-sc-wizard-header-step-btn {
+    min-height: 5.5rem;
+}
+
+.mentari-content-form-page .mentari-content-wizard .fi-sc-wizard-header-step-label {
+    font-weight: 800;
+}
+
+.mentari-content-form-page .mentari-content-wizard .fi-sc-wizard-step.fi-active {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.mentari-content-form-page .mentari-wizard-optional {
+    border-style: dashed;
+    box-shadow: none;
+}
+
+.mentari-content-form-page .mentari-wizard-publish {
+    border-top: 3px solid rgb(14 165 233);
+    background:
+        linear-gradient(180deg, rgb(240 249 255 / 0.72), rgb(255 255 255 / 0.96) 36%);
+}
+
+.mentari-content-form-page .mentari-content-wizard .fi-sc-wizard-footer {
+    position: sticky;
+    z-index: 20;
+    bottom: 1rem;
+    padding: 0.75rem;
+    border: 1px solid rgb(226 232 240 / 0.88);
+    border-radius: 0.875rem;
+    background: rgb(255 255 255 / 0.88);
+    box-shadow: 0 16px 34px rgb(15 23 42 / 0.13);
+    backdrop-filter: blur(16px);
+}
+
+.mentari-content-form-page .mentari-content-wizard .fi-sc-wizard-footer .fi-btn {
+    min-width: 7.5rem;
+    justify-content: center;
+}
+
+@media (max-width: 639px) {
+    .mentari-content-form-page .mentari-content-wizard .fi-sc-wizard-footer {
+        right: 1rem;
+        bottom: 0.75rem;
+        left: 1rem;
+    }
+
+    .mentari-content-form-page .mentari-content-wizard .fi-sc-wizard-header-step-btn {
+        min-height: auto;
+    }
+}
+
 .dark .fi-body.fi-panel-admin {
     background:
         radial-gradient(circle at top left, rgb(124 45 18 / 0.52), transparent 34rem),
@@ -196,4 +333,21 @@
 
 .dark .fi-panel-admin .fi-wi-stats-overview-stat-value {
     color: rgb(248 250 252);
+}
+
+.dark .mentari-content-form-page .mentari-editor-section,
+.dark .mentari-content-form-page .mentari-editor-section--publish,
+.dark .mentari-content-form-page .mentari-editor-section--compact,
+.dark .mentari-content-form-page .mentari-content-wizard .fi-sc-wizard-header,
+.dark .mentari-content-form-page .mentari-content-wizard .fi-sc-wizard-footer {
+    border-color: rgb(148 163 184 / 0.18);
+    background: rgb(15 23 42 / 0.9);
+}
+
+.dark .mentari-content-form-page .fi-fo-field-label-content {
+    color: rgb(241 245 249);
+}
+
+.dark .mentari-content-form-page .fi-fo-field > .fi-fo-field-content-col > .fi-sc-text {
+    color: rgb(148 163 184);
 }

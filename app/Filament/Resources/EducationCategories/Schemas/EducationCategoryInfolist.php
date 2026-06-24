@@ -12,18 +12,20 @@ class EducationCategoryInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('slug'),
-                TextEntry::make('title'),
+                TextEntry::make('title')
+                    ->label('Nama kategori'),
                 TextEntry::make('description')
+                    ->label('Deskripsi')
                     ->placeholder('-'),
-                TextEntry::make('sort_order')
-                    ->numeric(),
                 IconEntry::make('is_active')
+                    ->label('Status aktif')
                     ->boolean(),
                 TextEntry::make('created_at')
+                    ->label('Dibuat')
                     ->dateTime()
                     ->placeholder('-'),
                 TextEntry::make('updated_at')
+                    ->label('Diperbarui')
                     ->dateTime()
                     ->placeholder('-'),
             ]);

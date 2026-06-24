@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\EducationCategories;
 
-use App\Filament\Resources\EducationCategories\Pages\CreateEducationCategory;
 use App\Filament\Resources\EducationCategories\Pages\EditEducationCategory;
 use App\Filament\Resources\EducationCategories\Pages\ListEducationCategories;
 use App\Filament\Resources\EducationCategories\Pages\ViewEducationCategory;
@@ -58,7 +57,6 @@ class EducationCategoryResource extends Resource
     {
         return [
             'index' => ListEducationCategories::route('/'),
-            'create' => CreateEducationCategory::route('/create'),
             'view' => ViewEducationCategory::route('/{record}'),
             'edit' => EditEducationCategory::route('/{record}/edit'),
         ];
