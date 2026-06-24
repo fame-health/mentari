@@ -27,6 +27,7 @@ class User extends Authenticatable implements FilamentUser
         'level',
         'avatar_initial',
         'streak_days',
+        'can_take_screening',
     ];
 
     protected $hidden = [
@@ -40,6 +41,7 @@ class User extends Authenticatable implements FilamentUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'streak_days' => 'integer',
+            'can_take_screening' => 'boolean',
         ];
     }
 

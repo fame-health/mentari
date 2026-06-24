@@ -24,7 +24,7 @@ class SchoolResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Pengguna & Sekolah';
+    protected static string|\UnitEnum|null $navigationGroup = 'Data & Pengaturan';
 
     protected static ?string $modelLabel = 'Sekolah';
 

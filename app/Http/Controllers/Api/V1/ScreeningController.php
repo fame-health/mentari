@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\ScreeningQuestion;
+use App\Models\User;
 use App\Services\Dass21ScoringService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -51,6 +52,14 @@ class ScreeningController extends Controller
         }
 
         $result = DB::transaction(function () use ($request, $validated, $questions) {
+            $user = User::query()->lockForUpdate()->findOrFail($request->user()->id);
+
+            if (! $user->can_take_screening) {
+                throw ValidationException::withMessages([
+                    'screening' => ['Screening hanya dapat dilakukan satu kali. Hubungi admin untuk membuka akses tes ulang.'],
+                ]);
+            }
+
             $scores = ['depression' => 0, 'anxiety' => 0, 'stress' => 0];
 
             foreach ($validated['answers'] as $answer) {
@@ -60,7 +69,7 @@ class ScreeningController extends Controller
             $scores = collect($scores)->map(fn (int $score): int => $score * 2)->all();
             $severities = $this->scoring->severities($scores);
 
-            $result = $request->user()->screeningResults()->create([
+            $result = $user->screeningResults()->create([
                 'taken_at' => now(),
                 'depression_score' => $scores['depression'],
                 'depression_severity' => $severities['depression'],
@@ -79,7 +88,7 @@ class ScreeningController extends Controller
             );
 
             if ($level = $this->scoring->riskLevel($severities)) {
-                $request->user()->riskAlerts()->create([
+                $user->riskAlerts()->create([
                     'screening_result_id' => $result->id,
                     'level' => $level,
                     'title' => $level === 'urgent' ? 'Perlu dukungan segera' : 'Perlu perhatian',
@@ -89,6 +98,8 @@ class ScreeningController extends Controller
                         : 'Pertimbangkan berbicara dengan guru BK atau orang dewasa tepercaya dan lakukan screening lanjutan.',
                 ]);
             }
+
+            $user->update(['can_take_screening' => false]);
 
             return $result;
         });

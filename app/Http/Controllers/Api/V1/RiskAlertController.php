@@ -22,7 +22,7 @@ class RiskAlertController extends Controller
 
     public function dismiss(Request $request, RiskAlert $riskAlert): JsonResponse
     {
-        abort_unless($riskAlert->user_id === $request->user()->id, 403);
+        abort_unless($request->user()->role === 'admin', 403);
 
         $riskAlert->update(['dismissed_at' => now()]);
 

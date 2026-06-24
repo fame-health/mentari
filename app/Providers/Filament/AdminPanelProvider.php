@@ -11,6 +11,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -38,6 +39,12 @@ class AdminPanelProvider extends PanelProvider
                 'info' => Color::Sky,
                 'success' => Color::Emerald,
                 'warning' => Color::Amber,
+            ])
+            ->navigationGroups([
+                NavigationGroup::make('Data & Pengaturan'),
+                NavigationGroup::make('Monitoring Siswa'),
+                NavigationGroup::make('Konten & Dukungan'),
+                NavigationGroup::make('Komunitas'),
             ])
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')

@@ -26,6 +26,7 @@ CREATE TABLE users (
     level VARCHAR(50) NULL,
     avatar_initial CHAR(1) NULL,
     streak_days INT UNSIGNED NOT NULL DEFAULT 0,
+    can_take_screening BOOLEAN NOT NULL DEFAULT TRUE,
     remember_token VARCHAR(100) NULL,
     created_at TIMESTAMP NULL DEFAULT NULL,
     updated_at TIMESTAMP NULL DEFAULT NULL,
@@ -233,4 +234,3 @@ CREATE TABLE risk_alerts (
         FOREIGN KEY (screening_result_id) REFERENCES screening_results (id)
         ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-

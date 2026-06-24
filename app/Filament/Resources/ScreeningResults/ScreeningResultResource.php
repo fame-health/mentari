@@ -23,7 +23,7 @@ class ScreeningResultResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentChartBar;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Screening';
+    protected static string|\UnitEnum|null $navigationGroup = 'Monitoring Siswa';
 
     protected static ?string $modelLabel = 'Hasil Screening';
 

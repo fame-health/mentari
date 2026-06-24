@@ -2,10 +2,13 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use App\Models\User;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -34,6 +37,12 @@ class UsersTable
                 TextColumn::make('streak_days')
                     ->numeric()
                     ->sortable(),
+                TextColumn::make('can_take_screening')
+                    ->label('Akses Screening')
+                    ->badge()
+                    ->formatStateUsing(fn (bool $state): string => $state ? 'Boleh Tes' : 'Sudah Tes')
+                    ->color(fn (bool $state): string => $state ? 'success' : 'gray')
+                    ->icon(fn (bool $state): string => $state ? 'heroicon-o-check-circle' : 'heroicon-o-lock-closed'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -47,6 +56,25 @@ class UsersTable
                 //
             ])
             ->recordActions([
+                Action::make('resetScreening')
+                    ->label('Izinkan tes ulang')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('Reset akses screening siswa?')
+                    ->modalDescription('Siswa dapat mengisi screening satu kali lagi. Riwayat hasil sebelumnya tetap tersimpan.')
+                    ->visible(fn (User $record): bool => auth()->user()?->role === 'admin' && $record->role === 'student' && ! $record->can_take_screening)
+                    ->action(function (User $record): void {
+                        abort_unless(auth()->user()?->role === 'admin', 403);
+
+                        $record->update(['can_take_screening' => true]);
+
+                        Notification::make()
+                            ->title('Akses screening berhasil direset')
+                            ->body($record->name.' dapat mengikuti screening satu kali lagi.')
+                            ->success()
+                            ->send();
+                    }),
                 ViewAction::make(),
                 EditAction::make(),
             ])

@@ -51,5 +51,37 @@ class ScreeningApiTest extends TestCase
             'user_id' => $user->id,
             'level' => 'urgent',
         ]);
+
+        $this->assertFalse($user->fresh()->can_take_screening);
+    }
+
+    public function test_student_can_only_submit_once_until_admin_resets_access(): void
+    {
+        Sanctum::actingAs($user = User::factory()->create(['role' => 'student']));
+        $question = ScreeningQuestion::create([
+            'number' => 1,
+            'scale' => 'depression',
+            'text' => 'Pertanyaan pembatasan screening',
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+        $payload = [
+            'answers' => [
+                ['question_id' => $question->id, 'score' => 1],
+            ],
+        ];
+
+        $this->postJson('/api/v1/screening/results', $payload)->assertCreated();
+
+        $this->postJson('/api/v1/screening/results', $payload)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('screening');
+
+        $user->update(['can_take_screening' => true]);
+
+        $this->postJson('/api/v1/screening/results', $payload)->assertCreated();
+
+        $this->assertDatabaseCount('screening_results', 2);
+        $this->assertFalse($user->fresh()->can_take_screening);
     }
 }

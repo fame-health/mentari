@@ -22,7 +22,7 @@ class RiskAlertResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldExclamation;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Keselamatan';
+    protected static string|\UnitEnum|null $navigationGroup = 'Monitoring Siswa';
 
     protected static ?string $modelLabel = 'Alert Risiko';
 
@@ -30,7 +30,7 @@ class RiskAlertResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 3;
 
     public static function form(Schema $schema): Schema
     {

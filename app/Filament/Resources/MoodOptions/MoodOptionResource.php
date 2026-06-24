@@ -22,7 +22,7 @@ class MoodOptionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSwatch;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Mood';
+    protected static string|\UnitEnum|null $navigationGroup = 'Data & Pengaturan';
 
     protected static ?string $modelLabel = 'Pilihan Mood';
 
@@ -30,7 +30,7 @@ class MoodOptionResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'label';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 3;
 
     public static function form(Schema $schema): Schema
     {

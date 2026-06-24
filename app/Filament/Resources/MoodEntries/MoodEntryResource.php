@@ -22,13 +22,13 @@ class MoodEntryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFaceSmile;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Mood';
+    protected static string|\UnitEnum|null $navigationGroup = 'Monitoring Siswa';
 
     protected static ?string $modelLabel = 'Catatan Mood';
 
     protected static ?string $pluralModelLabel = 'Catatan Mood';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
     {

@@ -17,7 +17,17 @@ class AdminDashboardTest extends TestCase
         $this->actingAs($admin)
             ->get('/admin')
             ->assertOk()
-            ->assertSee('MENTARI Admin');
+            ->assertSee('MENTARI Admin')
+            ->assertSeeInOrder([
+                'Data &amp; Pengaturan',
+                'Sekolah',
+                'Pengguna',
+                'Pilihan Mood',
+                'Pertanyaan Screening',
+                'Monitoring Siswa',
+                'Konten &amp; Dukungan',
+                'Komunitas',
+            ], escape: false);
     }
 
     public function test_student_cannot_open_filament_dashboard(): void

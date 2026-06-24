@@ -28,6 +28,11 @@ class UserInfolist
                     ->placeholder('-'),
                 TextEntry::make('streak_days')
                     ->numeric(),
+                TextEntry::make('can_take_screening')
+                    ->label('Akses Screening')
+                    ->badge()
+                    ->formatStateUsing(fn (bool $state): string => $state ? 'Boleh Tes' : 'Sudah Tes')
+                    ->color(fn (bool $state): string => $state ? 'success' : 'gray'),
                 TextEntry::make('created_at')
                     ->dateTime()
                     ->placeholder('-'),

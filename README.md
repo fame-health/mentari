@@ -165,7 +165,7 @@ Accept: application/json
 | DELETE | `/community/posts/{id}` | Menghapus postingan sendiri |
 | POST | `/community/posts/{id}/like` | Toggle like |
 | GET | `/risk-alerts` | Daftar alert milik pengguna |
-| PATCH | `/risk-alerts/{id}/dismiss` | Menandai alert sudah dibaca |
+| PATCH | `/risk-alerts/{id}/dismiss` | Admin menandai alert sudah dibaca |
 
 Semua endpoint selain register dan login memerlukan `Authorization: Bearer`.
 
@@ -189,6 +189,8 @@ Ambil pertanyaan dari `/screening/questions`, lalu kirim seluruh pertanyaan akti
 ```
 
 Nilai jawaban harus `0` sampai `3`. Backend menghitung skor depresi, kecemasan, dan stres serta membuat alert bila hasil memerlukan perhatian.
+
+Setiap siswa hanya dapat mengirim screening satu kali. Admin dapat membuka akses satu kali lagi melalui menu Pengguna tanpa menghapus riwayat screening sebelumnya.
 
 ## Test dan Pemeriksaan Kode
 
