@@ -32,7 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->brandName('MENTARI Admin')
+            ->brandName('MENTARI')
             ->colors([
                 'primary' => Color::Pink,
                 'danger' => Color::Red,
