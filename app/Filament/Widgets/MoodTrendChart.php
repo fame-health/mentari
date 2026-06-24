@@ -17,7 +17,7 @@ class MoodTrendChart extends ChartWidget
 
     protected ?string $pollingInterval = '10s';
 
-    protected ?string $maxHeight = '320px';
+    protected ?string $maxHeight = '230px';
 
     protected int|string|array $columnSpan = [
         'default' => 1,
@@ -50,8 +50,8 @@ class MoodTrendChart extends ChartWidget
                     'backgroundColor' => 'rgba(249, 115, 22, 0.15)',
                     'pointBackgroundColor' => '#fb923c',
                     'pointBorderColor' => '#fff7ed',
-                    'pointRadius' => 4,
-                    'pointHoverRadius' => 6,
+                    'pointRadius' => 3,
+                    'pointHoverRadius' => 5,
                     'fill' => true,
                     'tension' => 0.42,
                 ],

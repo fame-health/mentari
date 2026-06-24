@@ -17,6 +17,15 @@ class MentariStatsOverview extends StatsOverviewWidget
 
     protected ?string $pollingInterval = '10s';
 
+    protected function getColumns(): int|array|null
+    {
+        return [
+            'default' => 1,
+            'sm' => 2,
+            'xl' => 4,
+        ];
+    }
+
     protected function getStats(): array
     {
         $studentCount = User::where('role', 'student')->count();
@@ -28,6 +37,7 @@ class MentariStatsOverview extends StatsOverviewWidget
 
         return [
             Stat::make('Siswa aktif', Number::format($studentCount))
+                ->extraAttributes(['class' => 'mentari-stat mentari-stat--students'])
                 ->description(School::count().' sekolah terdaftar')
                 ->icon('heroicon-o-users')
                 ->descriptionIcon('heroicon-m-building-office-2')
@@ -35,6 +45,7 @@ class MentariStatsOverview extends StatsOverviewWidget
                 ->chartColor('primary')
                 ->color('primary'),
             Stat::make('Mood hari ini', Number::format($todayMoodCount))
+                ->extraAttributes(['class' => 'mentari-stat mentari-stat--mood'])
                 ->description($this->formatDelta($todayMoodCount, $yesterdayMoodCount, 'dari kemarin'))
                 ->icon('heroicon-o-face-smile')
                 ->descriptionIcon($todayMoodCount >= $yesterdayMoodCount ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
@@ -43,6 +54,7 @@ class MentariStatsOverview extends StatsOverviewWidget
                 ->chartColor('success')
                 ->color('success'),
             Stat::make('Screening bulan ini', Number::format($monthlyScreenings))
+                ->extraAttributes(['class' => 'mentari-stat mentari-stat--screening'])
                 ->description('DASS-21 pada bulan berjalan')
                 ->icon('heroicon-o-clipboard-document-check')
                 ->descriptionIcon('heroicon-m-calendar-days')
@@ -50,6 +62,7 @@ class MentariStatsOverview extends StatsOverviewWidget
                 ->chartColor('info')
                 ->color('info'),
             Stat::make('Alert aktif', Number::format($activeAlerts))
+                ->extraAttributes(['class' => 'mentari-stat mentari-stat--alerts'])
                 ->description($urgentAlerts.' urgent butuh perhatian')
                 ->icon('heroicon-o-exclamation-triangle')
                 ->descriptionIcon($urgentAlerts > 0 ? 'heroicon-m-bell-alert' : 'heroicon-m-check-circle')

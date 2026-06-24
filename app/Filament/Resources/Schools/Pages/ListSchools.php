@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Schools\Pages;
 use App\Filament\Resources\Schools\SchoolResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\Width;
 
 class ListSchools extends ListRecords
 {
@@ -13,7 +14,14 @@ class ListSchools extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->label('Tambah sekolah')
+                ->icon('heroicon-o-plus')
+                ->modalHeading('Tambah sekolah')
+                ->modalDescription('Cukup isi nama dan alamat. Kode sekolah dibuat otomatis oleh sistem.')
+                ->modalSubmitActionLabel('Simpan sekolah')
+                ->modalWidth(Width::Large)
+                ->createAnother(false),
         ];
     }
 }

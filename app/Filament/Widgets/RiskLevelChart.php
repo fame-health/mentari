@@ -16,7 +16,7 @@ class RiskLevelChart extends ChartWidget
 
     protected ?string $pollingInterval = '10s';
 
-    protected ?string $maxHeight = '320px';
+    protected ?string $maxHeight = '230px';
 
     protected int|string|array $columnSpan = [
         'default' => 1,
@@ -76,7 +76,7 @@ SQL;
     protected function getOptions(): array|RawJs|null
     {
         return [
-            'cutout' => '68%',
+            'cutout' => '72%',
             'maintainAspectRatio' => false,
             'plugins' => [
                 'legend' => [
