@@ -26,6 +26,8 @@ class AdminRiskAlertTest extends TestCase
             ->test(ListRiskAlerts::class)
             ->assertCanSeeTableRecords([$latestAlert, $olderAlert], inOrder: true)
             ->assertTableActionVisible('markAsRead', $latestAlert)
+            ->assertTableActionHasLabel('markAsRead', 'Tandai dibaca')
+            ->assertTableActionHasIcon('markAsRead', 'heroicon-o-check-circle')
             ->callTableAction('markAsRead', $latestAlert);
 
         $this->assertNotNull($latestAlert->fresh()->dismissed_at);

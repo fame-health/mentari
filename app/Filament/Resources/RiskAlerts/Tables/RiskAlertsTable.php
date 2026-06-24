@@ -4,6 +4,7 @@ namespace App\Filament\Resources\RiskAlerts\Tables;
 
 use App\Models\RiskAlert;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -41,8 +42,9 @@ class RiskAlertsTable
                         default => 'success',
                     }),
                 TextColumn::make('title')
-                    ->label('Alert')
-                    ->searchable(),
+                    ->label('Peringatan')
+                    ->searchable()
+                    ->wrap(),
                 TextColumn::make('read_status')
                     ->label('Status')
                     ->state(fn (RiskAlert $record): string => $record->dismissed_at ? 'Telah Dibaca' : 'Belum Dibaca')
@@ -69,11 +71,13 @@ class RiskAlertsTable
             ->defaultSort('created_at', 'desc')
             ->recordActions([
                 Action::make('markAsRead')
-                    ->label('Tandai telah dibaca')
+                    ->label('Tandai dibaca')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
+                    ->button()
                     ->requiresConfirmation()
                     ->modalHeading('Tandai alert telah dibaca?')
+                    ->modalDescription('Status alert akan berubah menjadi telah dibaca dan dapat dikembalikan melalui menu aksi.')
                     ->visible(fn (RiskAlert $record): bool => auth()->user()?->role === 'admin' && $record->dismissed_at === null)
                     ->action(function (RiskAlert $record): void {
                         abort_unless(auth()->user()?->role === 'admin', 403);
@@ -85,25 +89,32 @@ class RiskAlertsTable
                             ->success()
                             ->send();
                     }),
-                Action::make('markAsUnread')
-                    ->label('Tandai belum dibaca')
-                    ->icon('heroicon-o-envelope')
-                    ->color('warning')
-                    ->requiresConfirmation()
-                    ->modalHeading('Kembalikan status menjadi belum dibaca?')
-                    ->visible(fn (RiskAlert $record): bool => auth()->user()?->role === 'admin' && $record->dismissed_at !== null)
-                    ->action(function (RiskAlert $record): void {
-                        abort_unless(auth()->user()?->role === 'admin', 403);
+                ActionGroup::make([
+                    ViewAction::make()
+                        ->label('Lihat detail alert'),
+                    EditAction::make()
+                        ->label('Ubah alert'),
+                    Action::make('markAsUnread')
+                        ->label('Tandai belum dibaca')
+                        ->icon('heroicon-o-envelope')
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->modalHeading('Kembalikan status menjadi belum dibaca?')
+                        ->modalDescription('Alert akan kembali ditampilkan sebagai alert yang belum dibaca.')
+                        ->visible(fn (RiskAlert $record): bool => auth()->user()?->role === 'admin' && $record->dismissed_at !== null)
+                        ->action(function (RiskAlert $record): void {
+                            abort_unless(auth()->user()?->role === 'admin', 403);
 
-                        $record->update(['dismissed_at' => null]);
+                            $record->update(['dismissed_at' => null]);
 
-                        Notification::make()
-                            ->title('Alert dikembalikan menjadi belum dibaca')
-                            ->success()
-                            ->send();
-                    }),
-                ViewAction::make(),
-                EditAction::make(),
+                            Notification::make()
+                                ->title('Alert dikembalikan menjadi belum dibaca')
+                                ->success()
+                                ->send();
+                        }),
+                ])
+                    ->label('Aksi alert')
+                    ->tooltip('Aksi alert lainnya'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

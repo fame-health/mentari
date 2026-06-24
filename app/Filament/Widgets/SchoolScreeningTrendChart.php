@@ -2,11 +2,9 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\ScreeningResult;
+use App\Services\SchoolScreeningReportData;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 
 class SchoolScreeningTrendChart extends ChartWidget
 {
@@ -20,51 +18,33 @@ class SchoolScreeningTrendChart extends ChartWidget
 
     protected function getData(): array
     {
-        $start = now()->startOfMonth()->subMonths(5);
-        $monthExpression = DB::connection()->getDriverName() === 'sqlite'
-            ? "strftime('%Y-%m', taken_at)"
-            : "DATE_FORMAT(taken_at, '%Y-%m')";
-
-        $averages = ScreeningResult::query()
-            ->whereHas('user', fn (Builder $query): Builder => $query
-                ->where('school_id', $this->schoolId)
-                ->where('role', 'student'))
-            ->where('taken_at', '>=', $start)
-            ->selectRaw("{$monthExpression} as month_key")
-            ->selectRaw('AVG(depression_score) as depression_average')
-            ->selectRaw('AVG(anxiety_score) as anxiety_average')
-            ->selectRaw('AVG(stress_score) as stress_average')
-            ->groupByRaw($monthExpression)
-            ->get()
-            ->keyBy('month_key');
-
-        $months = collect(range(0, 5))->map(fn (int $offset) => $start->copy()->addMonths($offset));
+        $trend = app(SchoolScreeningReportData::class)->trend($this->schoolId);
 
         return [
             'datasets' => [
                 [
                     'label' => 'Depresi',
-                    'data' => $months->map(fn ($month): ?float => $this->averageFor($averages, $month->format('Y-m'), 'depression_average'))->all(),
+                    'data' => $trend['depression'],
                     'borderColor' => '#f43f5e',
                     'backgroundColor' => '#f43f5e',
                     'tension' => 0.35,
                 ],
                 [
                     'label' => 'Kecemasan',
-                    'data' => $months->map(fn ($month): ?float => $this->averageFor($averages, $month->format('Y-m'), 'anxiety_average'))->all(),
+                    'data' => $trend['anxiety'],
                     'borderColor' => '#f59e0b',
                     'backgroundColor' => '#f59e0b',
                     'tension' => 0.35,
                 ],
                 [
                     'label' => 'Stres',
-                    'data' => $months->map(fn ($month): ?float => $this->averageFor($averages, $month->format('Y-m'), 'stress_average'))->all(),
+                    'data' => $trend['stress'],
                     'borderColor' => '#0ea5e9',
                     'backgroundColor' => '#0ea5e9',
                     'tension' => 0.35,
                 ],
             ],
-            'labels' => $months->map(fn ($month): string => $month->translatedFormat('M Y'))->all(),
+            'labels' => $trend['labels'],
         ];
     }
 
@@ -92,12 +72,5 @@ class SchoolScreeningTrendChart extends ChartWidget
                 ],
             ],
         ];
-    }
-
-    private function averageFor($averages, string $monthKey, string $column): ?float
-    {
-        $value = $averages->get($monthKey)?->{$column};
-
-        return $value === null ? null : round((float) $value, 1);
     }
 }

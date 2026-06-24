@@ -55,6 +55,16 @@ class ListSchoolScreeningResults extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('exportPdf')
+                ->label('Export PDF')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('danger')
+                ->url(route('admin.screening-results.school.export.pdf', $this->school)),
+            Action::make('exportExcel')
+                ->label('Export Excel')
+                ->icon('heroicon-o-table-cells')
+                ->color('success')
+                ->url(route('admin.screening-results.school.export.excel', $this->school)),
             Action::make('changeSchool')
                 ->label('Ganti sekolah')
                 ->icon('heroicon-o-arrow-left')
