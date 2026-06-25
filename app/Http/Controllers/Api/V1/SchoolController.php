@@ -12,6 +12,11 @@ class SchoolController extends Controller
     {
         $schools = School::query()
             ->select(['id', 'name', 'code', 'address'])
+            ->with(['classrooms' => fn ($query) => $query
+                ->select(['id', 'school_id', 'name', 'sort_order'])
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->orderBy('name')])
             ->orderBy('name')
             ->get();
 

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Classroom;
 use App\Models\EducationCategory;
 use App\Models\EducationContent;
 use App\Models\MoodOption;
@@ -20,13 +21,23 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Sekolah Demo Mentari', 'address' => 'Indonesia'],
         );
 
+        $classrooms = collect(['VII', 'VIII', 'IX', 'X', 'XI', 'XII'])
+            ->mapWithKeys(fn (string $name, int $index): array => [
+                $name => Classroom::updateOrCreate(
+                    ['school_id' => $school->id, 'name' => $name],
+                    ['sort_order' => $index + 1, 'is_active' => true],
+                ),
+            ]);
+
         User::updateOrCreate(
             ['email' => 'admin@mentari.test'],
             [
                 'school_id' => $school->id,
+                'classroom_id' => null,
                 'name' => 'Admin Mentari',
                 'password' => 'Mentari123!',
                 'role' => 'admin',
+                'level' => null,
                 'avatar_initial' => 'A',
                 'email_verified_at' => now(),
             ],
@@ -36,6 +47,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'siswa@mentari.test'],
             [
                 'school_id' => $school->id,
+                'classroom_id' => $classrooms['X']->id,
                 'name' => 'Siswa Demo',
                 'password' => 'Mentari123!',
                 'role' => 'student',

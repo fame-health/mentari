@@ -21,4 +21,24 @@ class Dass21ScoringServiceTest extends TestCase
             'stress' => 18,
         ]));
     }
+
+    public function test_summary_includes_the_dass_21_medical_disclaimer(): void
+    {
+        $service = new Dass21ScoringService;
+
+        $summary = $service->summary([
+            'depression' => 'normal',
+            'anxiety' => 'mild',
+            'stress' => 'moderate',
+        ]);
+
+        $this->assertStringContainsString(
+            'DASS-21 adalah instrumen skrining mandiri, bukan alat diagnostik medis formal.',
+            $summary,
+        );
+        $this->assertStringContainsString(
+            'Hasil ini tidak menggantikan evaluasi dari tenaga kesehatan profesional.',
+            $summary,
+        );
+    }
 }

@@ -2,12 +2,8 @@
 
 namespace App\Filament\Resources\ScreeningQuestions;
 
-use App\Filament\Resources\ScreeningQuestions\Pages\CreateScreeningQuestion;
-use App\Filament\Resources\ScreeningQuestions\Pages\EditScreeningQuestion;
 use App\Filament\Resources\ScreeningQuestions\Pages\ListScreeningQuestions;
-use App\Filament\Resources\ScreeningQuestions\Pages\ViewScreeningQuestion;
 use App\Filament\Resources\ScreeningQuestions\Schemas\ScreeningQuestionForm;
-use App\Filament\Resources\ScreeningQuestions\Schemas\ScreeningQuestionInfolist;
 use App\Filament\Resources\ScreeningQuestions\Tables\ScreeningQuestionsTable;
 use App\Models\ScreeningQuestion;
 use BackedEnum;
@@ -35,11 +31,6 @@ class ScreeningQuestionResource extends Resource
         return ScreeningQuestionForm::configure($schema);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return ScreeningQuestionInfolist::configure($schema);
-    }
-
     public static function table(Table $table): Table
     {
         return ScreeningQuestionsTable::configure($table);
@@ -56,9 +47,6 @@ class ScreeningQuestionResource extends Resource
     {
         return [
             'index' => ListScreeningQuestions::route('/'),
-            'create' => CreateScreeningQuestion::route('/create'),
-            'view' => ViewScreeningQuestion::route('/{record}'),
-            'edit' => EditScreeningQuestion::route('/{record}/edit'),
         ];
     }
 }

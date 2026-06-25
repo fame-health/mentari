@@ -34,6 +34,11 @@ class School extends Model
         return $this->hasMany(User::class);
     }
 
+    public function classrooms(): HasMany
+    {
+        return $this->hasMany(Classroom::class)->orderBy('sort_order')->orderBy('name');
+    }
+
     public function communityPosts(): HasMany
     {
         return $this->hasMany(CommunityPost::class);

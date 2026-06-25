@@ -15,19 +15,30 @@ class ScreeningQuestionForm
         return $schema
             ->components([
                 TextInput::make('number')
+                    ->label('Nomor Pertanyaan')
                     ->required()
                     ->numeric(),
                 Select::make('scale')
-                    ->options(['depression' => 'Depression', 'anxiety' => 'Anxiety', 'stress' => 'Stress'])
+                    ->label('Skala')
+                    ->options([
+                        'depression' => 'Depresi',
+                        'anxiety' => 'Kecemasan',
+                        'stress' => 'Stres',
+                    ])
                     ->required(),
                 Textarea::make('text')
+                    ->label('Teks Pertanyaan')
                     ->required()
+                    ->rows(5)
+                    ->maxLength(1000)
                     ->columnSpanFull(),
                 TextInput::make('sort_order')
+                    ->label('Urutan Tampil')
                     ->required()
                     ->numeric()
                     ->default(0),
                 Toggle::make('is_active')
+                    ->label('Aktif')
                     ->required(),
             ]);
     }

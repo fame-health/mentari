@@ -20,6 +20,7 @@ class User extends Authenticatable implements FilamentUser
 
     protected $fillable = [
         'school_id',
+        'classroom_id',
         'name',
         'email',
         'password',
@@ -50,6 +51,64 @@ class User extends Authenticatable implements FilamentUser
     public function school(): BelongsTo
     {
         return $this->belongsTo(School::class);
+    }
+
+    public function classroom(): BelongsTo
+    {
+        return $this->belongsTo(Classroom::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (User $user): void {
+            if ($user->isDirty('classroom_id')) {
+                if (! $user->classroom_id) {
+                    $user->level = null;
+
+                    return;
+                }
+
+                $classroom = Classroom::query()->find($user->classroom_id);
+
+                if ($classroom) {
+                    $user->school_id = $classroom->school_id;
+                    $user->level = $classroom->name;
+                }
+
+                return;
+            }
+
+            if ($user->isDirty('level')) {
+                if (! $user->school_id || blank($user->level)) {
+                    $user->classroom_id = null;
+
+                    return;
+                }
+
+                $user->classroom_id = Classroom::query()
+                    ->where('school_id', $user->school_id)
+                    ->where('name', trim($user->level))
+                    ->value('id');
+
+                return;
+            }
+
+            if ($user->isDirty('school_id')) {
+                $user->classroom_id = null;
+                $user->level = null;
+
+                return;
+            }
+
+            if ($user->classroom_id) {
+                $classroom = Classroom::query()->find($user->classroom_id);
+
+                if ($classroom) {
+                    $user->school_id = $classroom->school_id;
+                    $user->level = $classroom->name;
+                }
+            }
+        });
     }
 
     public function moodEntries(): HasMany

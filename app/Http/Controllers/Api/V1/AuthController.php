@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 
@@ -20,6 +21,13 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'school_id' => ['required', 'integer', 'exists:schools,id'],
+            'classroom_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('classrooms', 'id')->where(fn ($query) => $query
+                    ->where('school_id', $request->integer('school_id'))
+                    ->where('is_active', true)),
+            ],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::min(8)],
@@ -29,6 +37,7 @@ class AuthController extends Controller
 
         $user = User::create([
             'school_id' => $validated['school_id'] ?? null,
+            'classroom_id' => $validated['classroom_id'] ?? null,
             'name' => $validated['name'],
             'email' => Str::lower($validated['email']),
             'password' => $validated['password'],
@@ -41,7 +50,7 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Registrasi berhasil.',
             'data' => [
-                'user' => $user->load('school'),
+                'user' => $user->load(['school', 'classroom']),
                 'token' => $user->createToken($validated['device_name'] ?? 'android')->plainTextToken,
             ],
         ], 201);
@@ -71,7 +80,7 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Login berhasil.',
             'data' => [
-                'user' => $user->load('school'),
+                'user' => $user->load(['school', 'classroom']),
                 'token' => $user->createToken($deviceName)->plainTextToken,
             ],
         ]);
@@ -80,7 +89,7 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         return response()->json([
-            'data' => $request->user()->load('school'),
+            'data' => $request->user()->load(['school', 'classroom']),
         ]);
     }
 
@@ -89,6 +98,11 @@ class AuthController extends Controller
         $user = $request->user();
         $validated = $request->validate([
             'school_id' => ['sometimes', 'nullable', 'exists:schools,id'],
+            'classroom_id' => [
+                'sometimes',
+                'nullable',
+                Rule::exists('classrooms', 'id')->where('is_active', true),
+            ],
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'email' => ['sometimes', 'required', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'level' => ['sometimes', 'nullable', 'string', 'max:50'],
@@ -106,7 +120,29 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Profil berhasil diperbarui.',
-            'data' => $user->fresh()->load('school'),
+            'data' => $user->fresh()->load(['school', 'classroom']),
+        ]);
+    }
+
+    public function updateClassroom(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'classroom_id' => [
+                'required',
+                'integer',
+                Rule::exists('classrooms', 'id')->where('is_active', true),
+            ],
+        ]);
+
+        $request->user()->update([
+            'classroom_id' => $validated['classroom_id'],
+        ]);
+
+        return response()->json([
+            'message' => 'Kelas berhasil diperbarui.',
+            'data' => [
+                'user' => $request->user()->fresh()->load(['school', 'classroom']),
+            ],
         ]);
     }
 

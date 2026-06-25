@@ -7,8 +7,8 @@ use App\Http\Controllers\Api\V1\EducationController;
 use App\Http\Controllers\Api\V1\MoodController;
 use App\Http\Controllers\Api\V1\RecommendationController;
 use App\Http\Controllers\Api\V1\RiskAlertController;
-use App\Http\Controllers\Api\V1\ScreeningController;
 use App\Http\Controllers\Api\V1\SchoolController;
+use App\Http\Controllers\Api\V1\ScreeningController;
 use App\Http\Controllers\Api\V1\StreakController;
 use App\Http\Middleware\TrackDailyStreak;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +22,7 @@ Route::prefix('v1')->group(function (): void {
     Route::middleware(['auth:sanctum', TrackDailyStreak::class])->group(function (): void {
         Route::get('auth/me', [AuthController::class, 'me']);
         Route::patch('auth/profile', [AuthController::class, 'updateProfile']);
+        Route::patch('auth/classroom', [AuthController::class, 'updateClassroom']);
         Route::put('auth/password', [AuthController::class, 'changePassword']);
         Route::post('auth/logout', [AuthController::class, 'logout']);
 

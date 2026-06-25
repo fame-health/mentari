@@ -20,7 +20,7 @@ class ListSchools extends ListRecords
                 ->modalHeading('Tambah sekolah')
                 ->modalDescription('Cukup isi nama dan alamat. Kode sekolah dibuat otomatis oleh sistem.')
                 ->modalSubmitActionLabel('Simpan sekolah')
-                ->modalWidth(Width::Large)
+                ->modalWidth(Width::ThreeExtraLarge)
                 ->createAnother(false),
         ];
     }

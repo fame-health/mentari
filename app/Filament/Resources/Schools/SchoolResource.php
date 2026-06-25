@@ -66,6 +66,7 @@ class SchoolResource extends Resource
             ->withCount([
                 'users as students_count' => fn (Builder $query): Builder => $query->where('role', 'student'),
                 'users as counselors_count' => fn (Builder $query): Builder => $query->where('role', 'counselor'),
+                'classrooms as classrooms_count',
                 'screeningResults as screening_results_count',
                 'riskAlerts as active_risk_alerts_count' => fn (Builder $query): Builder => $query->whereNull('dismissed_at'),
             ]);

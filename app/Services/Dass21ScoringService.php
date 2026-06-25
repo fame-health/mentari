@@ -54,7 +54,7 @@ class Dass21ScoringService
         ];
 
         return sprintf(
-            'Depresi: %s, kecemasan: %s, dan stres: %s. Hasil ini merupakan screening awal, bukan diagnosis klinis.',
+            'Depresi: %s, kecemasan: %s, dan stres: %s. Catatan: DASS-21 adalah instrumen skrining mandiri, bukan alat diagnostik medis formal. Hasil ini tidak menggantikan evaluasi dari tenaga kesehatan profesional.',
             $labels[$severities['depression']],
             $labels[$severities['anxiety']],
             $labels[$severities['stress']],

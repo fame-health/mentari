@@ -25,12 +25,30 @@ class AdminSchoolModalTest extends TestCase
         $component->callAction('create', data: [
             'name' => 'SMA Negeri 1 Mentari',
             'address' => 'Jl. Mentari No. 1',
+            'classrooms' => [
+                [
+                    'name' => 'X IPA 1',
+                    'sort_order' => 1,
+                    'is_active' => true,
+                ],
+                [
+                    'name' => 'XI IPA 1',
+                    'sort_order' => 2,
+                    'is_active' => true,
+                ],
+            ],
         ]);
 
         $this->assertDatabaseHas('schools', [
             'name' => 'SMA Negeri 1 Mentari',
             'code' => 'SMA-NEGERI-1-MENTARI',
             'address' => 'Jl. Mentari No. 1',
+        ]);
+        $this->assertDatabaseHas('classrooms', [
+            'school_id' => School::query()->where('code', 'SMA-NEGERI-1-MENTARI')->value('id'),
+            'name' => 'X IPA 1',
+            'sort_order' => 1,
+            'is_active' => true,
         ]);
     }
 
@@ -67,5 +85,47 @@ class AdminSchoolModalTest extends TestCase
             'code' => 'SMP-MENTARI',
             'address' => 'Jl. Pelajar No. 3',
         ]);
+    }
+
+    public function test_admin_can_add_multiple_classes_from_a_school_row(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $school = School::create([
+            'name' => 'SMA Mentari Kelas',
+            'code' => 'SMK-01',
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(ListSchools::class)
+            ->assertTableActionVisible('manageClassrooms', $school)
+            ->assertTableActionDoesNotHaveUrl('manageClassrooms', $school)
+            ->callTableAction('manageClassrooms', $school, data: [
+                'classrooms' => [
+                    [
+                        'id' => null,
+                        'name' => 'X MIPA 1',
+                        'sort_order' => 1,
+                        'is_active' => true,
+                    ],
+                    [
+                        'id' => null,
+                        'name' => 'XI IPS 1',
+                        'sort_order' => 2,
+                        'is_active' => true,
+                    ],
+                ],
+            ]);
+
+        $this->assertDatabaseHas('classrooms', [
+            'school_id' => $school->id,
+            'name' => 'X MIPA 1',
+            'sort_order' => 1,
+        ]);
+        $this->assertDatabaseHas('classrooms', [
+            'school_id' => $school->id,
+            'name' => 'XI IPS 1',
+            'sort_order' => 2,
+        ]);
+        $this->assertSame(2, $school->classrooms()->count());
     }
 }

@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Models\Classroom;
+use App\Models\School;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -34,13 +36,30 @@ class AdminScreeningAccessTest extends TestCase
     public function test_admin_can_reset_a_students_screening_access(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
+        $school = School::create([
+            'name' => 'SMA Mentari',
+            'code' => 'SMA-MENTARI',
+        ]);
+        $classroom = Classroom::create([
+            'school_id' => $school->id,
+            'name' => 'X',
+            'sort_order' => 1,
+        ]);
         $student = User::factory()->create([
+            'school_id' => $school->id,
+            'classroom_id' => $classroom->id,
             'role' => 'student',
+            'level' => 'X',
             'can_take_screening' => false,
         ]);
 
-        Livewire::actingAs($admin)
-            ->test(ListUsers::class)
+        $component = Livewire::actingAs($admin)
+            ->test(ListUsers::class);
+
+        $component->call('selectSchool', $school->id);
+        $component->call('selectLevel', (string) $classroom->id);
+
+        $component
             ->assertTableActionVisible('resetScreening', $student)
             ->assertTableActionHasLabel('resetScreening', 'Kasih akses screening')
             ->assertTableActionHasIcon('resetScreening', 'heroicon-o-key')

@@ -35,6 +35,14 @@ class SchoolInfolist
                     ->icon('heroicon-o-sparkles')
                     ->columns(2)
                     ->schema([
+                        TextEntry::make('classrooms')
+                            ->label('Kelas tersedia')
+                            ->state(fn (School $record): string => $record->classrooms()
+                                ->where('is_active', true)
+                                ->pluck('name')
+                                ->join(', '))
+                            ->placeholder('Belum ada kelas')
+                            ->columnSpanFull(),
                         TextEntry::make('students_count')
                             ->label('Berapa siswa terdaftar?')
                             ->state(fn (School $record): int => self::studentsCount($record))
