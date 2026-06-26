@@ -58,6 +58,13 @@ class ScreeningResultForm
                 Textarea::make('summary')
                     ->required()
                     ->columnSpanFull(),
+                Select::make('recommendation_id')
+                    ->label('Rekomendasi personalisasi')
+                    ->relationship('recommendation', 'title')
+                    ->searchable()
+                    ->preload()
+                    ->placeholder('Pilih rekomendasi')
+                    ->columnSpanFull(),
             ]);
     }
 }

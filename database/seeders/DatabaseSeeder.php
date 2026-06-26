@@ -149,5 +149,55 @@ class DatabaseSeeder extends Seeder
                 [...$recommendation, 'is_active' => true],
             );
         }
+
+        $counselingScripts = [
+            [
+                'title' => 'Skrip konseling - Normal',
+                'severity' => 'normal',
+                'description' => 'Berdasarkan hasil skrining, kondisi Anda masih dalam batas normal. Ini kabar baik, tetapi tetap penting menjaga pola hidup sehat, tidur cukup, dan aktivitas fisik. Bila nanti muncul keluhan seperti sulit tidur, cemas berlebihan, atau sedih berkepanjangan, silakan lakukan skrining ulang atau berkonsultasi.',
+                'accent_color' => '#22C55E',
+            ],
+            [
+                'title' => 'Skrip konseling - Ringan',
+                'severity' => 'mild',
+                'description' => 'Hasil Anda menunjukkan gejala ringan. Biasanya kondisi ini bisa membaik dengan istirahat cukup, aktivitas fisik teratur, dan teknik relaksasi sederhana. Saya sarankan Anda memantau kondisi selama beberapa minggu. Bila keluhan tidak membaik atau justru meningkat, sebaiknya konsultasi lebih lanjut.',
+                'accent_color' => '#38BDF8',
+            ],
+            [
+                'title' => 'Skrip konseling - Sedang',
+                'severity' => 'moderate',
+                'description' => 'Hasil skrining menunjukkan gejala sedang, yang berarti kondisi ini sudah mulai mengganggu aktivitas sehari-hari. Saya menyarankan Anda untuk berkonsultasi dengan psikolog atau layanan kesehatan mental agar mendapat penanganan yang sesuai. Sementara itu, coba kurangi beban, jaga pola tidur, dan catat situasi yang memicu stres.',
+                'accent_color' => '#F59E0B',
+            ],
+            [
+                'title' => 'Skrip konseling - Berat',
+                'severity' => 'severe',
+                'description' => 'Hasil Anda menunjukkan gejala berat. Kondisi ini perlu evaluasi profesional segera karena dapat berdampak besar pada fungsi harian. Saya menyarankan Anda segera menghubungi psikolog, psikiater, atau fasilitas kesehatan terdekat. Jika ada pikiran untuk menyakiti diri, segera cari bantuan darurat.',
+                'accent_color' => '#EF4444',
+            ],
+            [
+                'title' => 'Skrip konseling - Sangat Berat',
+                'severity' => 'extremely_severe',
+                'description' => 'Hasil skrining menunjukkan kondisi sangat berat dan memerlukan penanganan segera. Keselamatan Anda adalah hal utama, jadi jangan menunda untuk mendapatkan bantuan profesional. Mohon segera dibawa atau diarahkan ke layanan kesehatan jiwa atau unit gawat darurat, dan pastikan ada pendamping dari orang terdekat.',
+                'accent_color' => '#B91C1C',
+            ],
+        ];
+
+        foreach ($counselingScripts as $script) {
+            Recommendation::updateOrCreate(
+                [
+                    'category' => Recommendation::COUNSELING_SCRIPT_CATEGORY,
+                    'severity' => $script['severity'],
+                ],
+                [
+                    ...$script,
+                    'category' => Recommendation::COUNSELING_SCRIPT_CATEGORY,
+                    'duration_minutes' => null,
+                    'duration_label' => 'Skrip singkat',
+                    'priority' => 'personalized',
+                    'is_active' => true,
+                ],
+            );
+        }
     }
 }

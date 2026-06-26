@@ -126,6 +126,23 @@ CREATE TABLE screening_questions (
     KEY screening_questions_active_sort_index (is_active, sort_order)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE recommendations (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    severity ENUM('normal', 'mild', 'moderate', 'severe', 'extremely_severe') NULL,
+    description TEXT NOT NULL,
+    duration_minutes SMALLINT UNSIGNED NULL,
+    duration_label VARCHAR(50) NULL,
+    priority VARCHAR(50) NULL,
+    accent_color CHAR(10) NULL,
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP NULL DEFAULT NULL,
+    updated_at TIMESTAMP NULL DEFAULT NULL,
+    KEY recommendations_category_active_index (category, is_active),
+    KEY recommendations_category_severity_is_active_index (category, severity, is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE screening_results (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,
@@ -137,12 +154,17 @@ CREATE TABLE screening_results (
     stress_score SMALLINT UNSIGNED NOT NULL,
     stress_severity ENUM('normal', 'mild', 'moderate', 'severe', 'extremely_severe') NOT NULL,
     summary TEXT NOT NULL,
+    recommendation_id BIGINT UNSIGNED NULL,
     created_at TIMESTAMP NULL DEFAULT NULL,
     updated_at TIMESTAMP NULL DEFAULT NULL,
     KEY screening_results_user_taken_index (user_id, taken_at),
+    KEY screening_results_recommendation_id_foreign (recommendation_id),
     CONSTRAINT screening_results_user_id_foreign
         FOREIGN KEY (user_id) REFERENCES users (id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT screening_results_recommendation_id_foreign
+        FOREIGN KEY (recommendation_id) REFERENCES recommendations (id)
+        ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE screening_answers (
@@ -161,21 +183,6 @@ CREATE TABLE screening_answers (
         FOREIGN KEY (screening_question_id) REFERENCES screening_questions (id)
         ON DELETE RESTRICT,
     CONSTRAINT screening_answers_score_check CHECK (score BETWEEN 0 AND 3)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE recommendations (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(150) NOT NULL,
-    category VARCHAR(100) NOT NULL,
-    description TEXT NOT NULL,
-    duration_minutes SMALLINT UNSIGNED NULL,
-    duration_label VARCHAR(50) NULL,
-    priority VARCHAR(50) NULL,
-    accent_color CHAR(10) NULL,
-    is_active TINYINT(1) NOT NULL DEFAULT 1,
-    created_at TIMESTAMP NULL DEFAULT NULL,
-    updated_at TIMESTAMP NULL DEFAULT NULL,
-    KEY recommendations_category_active_index (category, is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE community_posts (

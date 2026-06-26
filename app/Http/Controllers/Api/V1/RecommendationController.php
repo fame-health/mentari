@@ -17,8 +17,12 @@ class RecommendationController extends Controller
             $query->where('category', $request->string('category'));
         }
 
+        if ($request->filled('severity')) {
+            $query->where('severity', $request->string('severity'));
+        }
+
         return response()->json([
-            'data' => $query->orderBy('category')->orderBy('title')->get(),
+            'data' => $query->orderBy('category')->orderBy('severity')->orderBy('title')->get(),
         ]);
     }
 }

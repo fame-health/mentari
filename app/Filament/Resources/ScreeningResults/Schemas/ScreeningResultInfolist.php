@@ -29,6 +29,13 @@ class ScreeningResultInfolist
                     ->badge(),
                 TextEntry::make('summary')
                     ->columnSpanFull(),
+                TextEntry::make('recommendation.title')
+                    ->label('Rekomendasi personalisasi')
+                    ->placeholder('-'),
+                TextEntry::make('recommendation.description')
+                    ->label('Skrip konseling singkat')
+                    ->placeholder('-')
+                    ->columnSpanFull(),
                 TextEntry::make('created_at')
                     ->dateTime()
                     ->placeholder('-'),

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Recommendation;
 use App\Models\ScreeningQuestion;
 use App\Models\User;
 use App\Services\Dass21ScoringService;
@@ -27,7 +28,7 @@ class ScreeningController extends Controller
         return response()->json(
             $request->user()
                 ->screeningResults()
-                ->with('riskAlert')
+                ->with(['riskAlert', 'recommendation'])
                 ->latest('taken_at')
                 ->paginate(min($request->integer('per_page', 20), 100)),
         );
@@ -68,6 +69,8 @@ class ScreeningController extends Controller
 
             $scores = collect($scores)->map(fn (int $score): int => $score * 2)->all();
             $severities = $this->scoring->severities($scores);
+            $highestSeverity = $this->scoring->highestSeverity($severities);
+            $recommendation = Recommendation::counselingScriptForSeverity($highestSeverity);
 
             $result = $user->screeningResults()->create([
                 'taken_at' => now(),
@@ -78,6 +81,7 @@ class ScreeningController extends Controller
                 'stress_score' => $scores['stress'],
                 'stress_severity' => $severities['stress'],
                 'summary' => $this->scoring->summary($severities),
+                'recommendation_id' => $recommendation?->id,
             ]);
 
             $result->answers()->createMany(
@@ -93,9 +97,9 @@ class ScreeningController extends Controller
                     'level' => $level,
                     'title' => $level === 'urgent' ? 'Perlu dukungan segera' : 'Perlu perhatian',
                     'message' => $result->summary,
-                    'recommendation' => $level === 'urgent'
+                    'recommendation' => $recommendation?->description ?? ($level === 'urgent'
                         ? 'Segera hubungi guru BK, psikolog, orang dewasa tepercaya, atau layanan darurat bila merasa tidak aman.'
-                        : 'Pertimbangkan berbicara dengan guru BK atau orang dewasa tepercaya dan lakukan screening lanjutan.',
+                        : 'Pertimbangkan berbicara dengan guru BK atau orang dewasa tepercaya dan lakukan screening lanjutan.'),
                 ]);
             }
 
@@ -106,7 +110,7 @@ class ScreeningController extends Controller
 
         return response()->json([
             'message' => 'Screening berhasil disimpan.',
-            'data' => $result->load(['answers.question', 'riskAlert']),
+            'data' => $result->load(['answers.question', 'riskAlert', 'recommendation']),
         ], 201);
     }
 }

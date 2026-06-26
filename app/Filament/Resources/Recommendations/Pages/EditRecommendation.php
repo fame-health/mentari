@@ -11,6 +11,10 @@ class EditRecommendation extends EditRecord
 {
     protected static string $resource = RecommendationResource::class;
 
+    protected array $extraBodyAttributes = [
+        'class' => 'mentari-content-form-page mentari-recommendation-form-page',
+    ];
+
     protected function getHeaderActions(): array
     {
         return [

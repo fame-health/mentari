@@ -41,4 +41,15 @@ class Dass21ScoringServiceTest extends TestCase
             $summary,
         );
     }
+
+    public function test_it_uses_the_highest_severity_for_personalized_recommendations(): void
+    {
+        $service = new Dass21ScoringService;
+
+        $this->assertSame('severe', $service->highestSeverity([
+            'depression' => 'mild',
+            'anxiety' => 'severe',
+            'stress' => 'moderate',
+        ]));
+    }
 }

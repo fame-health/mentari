@@ -607,6 +607,84 @@
         linear-gradient(180deg, rgb(240 249 255 / 0.72), rgb(255 255 255 / 0.96) 36%);
 }
 
+.mentari-recommendation-form-page .mentari-recommendation-section--primary {
+    border-top: 3px solid rgb(14 165 233);
+    background:
+        linear-gradient(180deg, rgb(240 249 255 / 0.74), rgb(255 255 255 / 0.96) 36%);
+}
+
+.mentari-recommendation-form-page .mentari-recommendation-section:not(.mentari-recommendation-section--primary, .mentari-recommendation-section--settings) {
+    border-top: 3px solid rgb(236 72 153);
+}
+
+.mentari-recommendation-form-page .mentari-recommendation-section--settings {
+    border-top: 3px solid rgb(16 185 129);
+    background:
+        linear-gradient(180deg, rgb(236 253 245 / 0.72), rgb(255 255 255 / 0.96) 36%);
+}
+
+.mentari-recommendation-form-page .fi-fo-toggle-buttons {
+    flex-wrap: wrap;
+}
+
+.mentari-recommendation-form-page textarea {
+    min-height: 11rem;
+}
+
+.mentari-recommendation-form-page .mentari-recommendation-wizard .fi-sc-wizard-header-step-btn {
+    min-height: 5rem;
+}
+
+.mentari-recommendation-form-page .mentari-recommendation-wizard .fi-sc-wizard-header-step-label {
+    font-weight: 800;
+}
+
+.mentari-recommendation-view-page .fi-page-header-main-ctn {
+    gap: 0.75rem;
+}
+
+.mentari-recommendation-view-page .fi-header {
+    padding: 0.95rem 1.1rem;
+}
+
+.mentari-recommendation-view-page .fi-header-heading {
+    font-size: clamp(1.15rem, 2vw, 1.45rem);
+    line-height: 1.35;
+}
+
+.mentari-recommendation-view-page .fi-header-subheading {
+    margin-top: 0.15rem;
+    font-size: 0.85rem;
+}
+
+.mentari-recommendation-view-page .mentari-recommendation-view-section {
+    overflow: hidden;
+    box-shadow: 0 10px 26px rgb(15 23 42 / 0.055);
+}
+
+.mentari-recommendation-view-page .mentari-recommendation-view-section--main {
+    border-top: 3px solid rgb(236 72 153);
+    background:
+        linear-gradient(180deg, rgb(253 242 248 / 0.74), rgb(255 255 255 / 0.96) 34%);
+}
+
+.mentari-recommendation-view-page .mentari-recommendation-view-section--meta {
+    border-style: dashed;
+    box-shadow: none;
+}
+
+.mentari-recommendation-view-page .mentari-recommendation-view-section .fi-section-header {
+    padding-block: 0.8rem;
+}
+
+.mentari-recommendation-view-page .mentari-recommendation-view-section .fi-section-content {
+    padding-block: 0.85rem;
+}
+
+.mentari-recommendation-view-page .mentari-recommendation-view-section .fi-in-text-item {
+    line-height: 1.65;
+}
+
 .mentari-content-form-page .mentari-content-wizard .fi-sc-wizard-footer {
     position: sticky;
     z-index: 20;

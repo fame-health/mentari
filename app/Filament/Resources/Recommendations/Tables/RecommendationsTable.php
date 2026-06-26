@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\Recommendations\Tables;
 
+use App\Models\Recommendation;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class RecommendationsTable
@@ -17,19 +19,30 @@ class RecommendationsTable
         return $table
             ->columns([
                 TextColumn::make('title')
+                    ->label('Judul')
+                    ->description(fn (Recommendation $record): ?string => filled($record->description)
+                        ? str($record->description)->limit(90)->toString()
+                        : null)
+                    ->wrap()
                     ->searchable(),
                 TextColumn::make('category')
+                    ->label('Jenis')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => Recommendation::CATEGORY_LABELS[$state] ?? ($state ?: '-'))
                     ->searchable(),
-                TextColumn::make('duration_minutes')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('duration_label')
-                    ->searchable(),
-                TextColumn::make('priority')
-                    ->searchable(),
-                TextColumn::make('accent_color')
-                    ->searchable(),
+                TextColumn::make('severity')
+                    ->label('Status DASS-21')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => $state ? Recommendation::SEVERITY_LABELS[$state] : '-')
+                    ->color(fn (?string $state): string => match ($state) {
+                        'normal' => 'success',
+                        'mild' => 'info',
+                        'moderate' => 'warning',
+                        'severe', 'extremely_severe' => 'danger',
+                        default => 'gray',
+                    }),
                 IconColumn::make('is_active')
+                    ->label('Aktif')
                     ->boolean(),
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -41,7 +54,12 @@ class RecommendationsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('category')
+                    ->label('Jenis rekomendasi')
+                    ->options(Recommendation::CATEGORY_LABELS),
+                SelectFilter::make('severity')
+                    ->label('Status DASS-21')
+                    ->options(Recommendation::SEVERITY_LABELS),
             ])
             ->recordActions([
                 ViewAction::make(),

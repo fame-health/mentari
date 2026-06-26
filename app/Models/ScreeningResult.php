@@ -22,6 +22,7 @@ class ScreeningResult extends Model
         'stress_score',
         'stress_severity',
         'summary',
+        'recommendation_id',
     ];
 
     protected function casts(): array
@@ -47,5 +48,10 @@ class ScreeningResult extends Model
     public function riskAlert(): HasOne
     {
         return $this->hasOne(RiskAlert::class);
+    }
+
+    public function recommendation(): BelongsTo
+    {
+        return $this->belongsTo(Recommendation::class);
     }
 }

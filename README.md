@@ -18,7 +18,7 @@ Backend Laravel untuk aplikasi Android MENTARI, dilengkapi REST API, autentikasi
 - Check-in mood harian.
 - Screening DASS-21 dan perhitungan severity.
 - Alert risiko berdasarkan hasil screening.
-- Konten edukasi dan rekomendasi self-care.
+- Konten edukasi, rekomendasi self-care, dan skrip konseling personalisasi.
 - Postingan komunitas dan fitur like.
 - Dashboard admin dengan statistik, tren mood, dan alert terbaru.
 - CRUD admin untuk seluruh tabel utama.
@@ -161,7 +161,7 @@ Accept: application/json
 | GET | `/education` | Kategori dan konten edukasi |
 | GET | `/education/search?q=...` | Mencari konten |
 | GET | `/education/{id}` | Detail konten |
-| GET | `/recommendations` | Daftar rekomendasi |
+| GET | `/recommendations` | Daftar rekomendasi, dapat difilter dengan `category` dan `severity` |
 | GET | `/community/posts` | Daftar postingan sekolah |
 | POST | `/community/posts` | Membuat postingan |
 | DELETE | `/community/posts/{id}` | Menghapus postingan sendiri |
@@ -202,7 +202,13 @@ Ambil pertanyaan dari `/screening/questions`, lalu kirim seluruh pertanyaan akti
 }
 ```
 
-Nilai jawaban harus `0` sampai `3`. Backend menghitung skor depresi, kecemasan, dan stres serta membuat alert bila hasil memerlukan perhatian.
+Nilai jawaban harus `0` sampai `3`. Backend menghitung skor depresi, kecemasan, dan stres, memilih rekomendasi personalisasi berdasarkan severity tertinggi, serta membuat alert bila hasil memerlukan perhatian.
+
+Response `POST /screening/results` memuat relasi `recommendation` bila ada skrip yang cocok. Untuk mengambil skrip konseling langsung, gunakan:
+
+```http
+GET /api/v1/recommendations?category=counseling_script&severity=moderate
+```
 
 Setiap siswa hanya dapat mengirim screening satu kali. Admin dapat membuka akses satu kali lagi melalui menu Pengguna tanpa menghapus riwayat screening sebelumnya.
 
@@ -223,7 +229,8 @@ Seeder membuat:
 - lima pilihan mood;
 - 21 pertanyaan screening;
 - konten edukasi;
-- rekomendasi aktivitas.
+- rekomendasi aktivitas;
+- lima skrip konseling personalisasi untuk status normal, ringan, sedang, berat, dan sangat berat.
 
 Akun siswa demo:
 

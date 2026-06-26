@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api;
 
+use App\Models\Recommendation;
 use App\Models\ScreeningQuestion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -32,6 +33,14 @@ class ScreeningApiTest extends TestCase
                 'is_active' => true,
             ]),
         );
+        $script = Recommendation::create([
+            'title' => 'Skrip konseling - Sangat Berat',
+            'category' => Recommendation::COUNSELING_SCRIPT_CATEGORY,
+            'severity' => 'extremely_severe',
+            'description' => 'Hasil skrining menunjukkan kondisi sangat berat dan memerlukan penanganan segera.',
+            'priority' => 'personalized',
+            'is_active' => true,
+        ]);
 
         $response = $this->postJson('/api/v1/screening/results', [
             'answers' => $questions->map(fn (ScreeningQuestion $question): array => [
@@ -45,11 +54,18 @@ class ScreeningApiTest extends TestCase
             ->assertJsonPath('data.depression_score', 42)
             ->assertJsonPath('data.anxiety_score', 42)
             ->assertJsonPath('data.stress_score', 42)
-            ->assertJsonPath('data.risk_alert.level', 'urgent');
+            ->assertJsonPath('data.risk_alert.level', 'urgent')
+            ->assertJsonPath('data.risk_alert.recommendation', $script->description)
+            ->assertJsonPath('data.recommendation.severity', 'extremely_severe');
 
         $this->assertDatabaseHas('risk_alerts', [
             'user_id' => $user->id,
             'level' => 'urgent',
+            'recommendation' => $script->description,
+        ]);
+        $this->assertDatabaseHas('screening_results', [
+            'user_id' => $user->id,
+            'recommendation_id' => $script->id,
         ]);
 
         $this->assertFalse($user->fresh()->can_take_screening);
