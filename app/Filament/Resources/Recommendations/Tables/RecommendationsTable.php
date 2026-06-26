@@ -20,9 +20,7 @@ class RecommendationsTable
             ->columns([
                 TextColumn::make('title')
                     ->label('Judul')
-                    ->description(fn (Recommendation $record): ?string => filled($record->description)
-                        ? str($record->description)->limit(90)->toString()
-                        : null)
+                    ->description(fn (Recommendation $record): ?string => self::previewText($record))
                     ->wrap()
                     ->searchable(),
                 TextColumn::make('category')
@@ -70,5 +68,14 @@ class RecommendationsTable
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    private static function previewText(Recommendation $record): ?string
+    {
+        $preview = $record->category === Recommendation::DASHBOARD_ANALYSIS_CATEGORY
+            ? ($record->education_message ?: collect($record->main_points)->first())
+            : $record->description;
+
+        return filled($preview) ? str($preview)->limit(90)->toString() : null;
     }
 }

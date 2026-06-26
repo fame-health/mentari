@@ -56,7 +56,9 @@ class ScreeningApiTest extends TestCase
             ->assertJsonPath('data.stress_score', 42)
             ->assertJsonPath('data.risk_alert.level', 'urgent')
             ->assertJsonPath('data.risk_alert.recommendation', $script->description)
-            ->assertJsonPath('data.recommendation.severity', 'extremely_severe');
+            ->assertJsonPath('data.recommendation.severity', 'extremely_severe')
+            ->assertJsonPath('data.analysis.title', 'Gejala Sangat Berat')
+            ->assertJsonPath('data.analysis.severity_label', 'Sangat Berat');
 
         $this->assertDatabaseHas('risk_alerts', [
             'user_id' => $user->id,

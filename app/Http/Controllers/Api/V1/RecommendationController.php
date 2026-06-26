@@ -15,6 +15,11 @@ class RecommendationController extends Controller
 
         if ($request->filled('category')) {
             $query->where('category', $request->string('category'));
+        } else {
+            $query->whereNotIn('category', [
+                Recommendation::COUNSELING_SCRIPT_CATEGORY,
+                Recommendation::DASHBOARD_ANALYSIS_CATEGORY,
+            ]);
         }
 
         if ($request->filled('severity')) {

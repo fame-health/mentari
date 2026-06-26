@@ -132,6 +132,8 @@ CREATE TABLE recommendations (
     category VARCHAR(100) NOT NULL,
     severity ENUM('normal', 'mild', 'moderate', 'severe', 'extremely_severe') NULL,
     description TEXT NOT NULL,
+    main_points JSON NULL,
+    education_message TEXT NULL,
     duration_minutes SMALLINT UNSIGNED NULL,
     duration_label VARCHAR(50) NULL,
     priority VARCHAR(50) NULL,

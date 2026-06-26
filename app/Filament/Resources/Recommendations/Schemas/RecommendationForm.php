@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Recommendations\Schemas;
 use App\Models\Recommendation;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -109,12 +110,14 @@ class RecommendationForm
                 ->options(Recommendation::CATEGORY_LABELS)
                 ->icons([
                     Recommendation::COUNSELING_SCRIPT_CATEGORY => 'heroicon-o-chat-bubble-left-right',
+                    Recommendation::DASHBOARD_ANALYSIS_CATEGORY => 'heroicon-o-chart-bar-square',
                     'relaxation' => 'heroicon-o-sparkles',
                     'reflection' => 'heroicon-o-pencil-square',
                     'activity' => 'heroicon-o-bolt',
                 ])
                 ->colors([
                     Recommendation::COUNSELING_SCRIPT_CATEGORY => 'info',
+                    Recommendation::DASHBOARD_ANALYSIS_CATEGORY => 'primary',
                     'relaxation' => 'success',
                     'reflection' => 'warning',
                     'activity' => 'gray',
@@ -124,7 +127,7 @@ class RecommendationForm
                 ->live()
                 ->default(Recommendation::COUNSELING_SCRIPT_CATEGORY)
                 ->afterStateUpdated(function (Set $set, Get $get, ?string $state): void {
-                    if ($state !== Recommendation::COUNSELING_SCRIPT_CATEGORY) {
+                    if (! in_array($state, [Recommendation::COUNSELING_SCRIPT_CATEGORY, Recommendation::DASHBOARD_ANALYSIS_CATEGORY], true)) {
                         $set('severity', null);
 
                         return;
@@ -135,7 +138,9 @@ class RecommendationForm
                     }
 
                     if (blank($get('duration_label'))) {
-                        $set('duration_label', 'Skrip singkat');
+                        $set('duration_label', $state === Recommendation::DASHBOARD_ANALYSIS_CATEGORY
+                            ? 'Analisis dashboard'
+                            : 'Skrip singkat');
                     }
                 })
                 ->required()
@@ -174,16 +179,38 @@ class RecommendationForm
                 ])
                 ->grouped()
                 ->inline()
-                ->visible(fn (Get $get): bool => $get('category') === Recommendation::COUNSELING_SCRIPT_CATEGORY)
-                ->helperText('Sistem memakai status ini untuk memilih skrip otomatis setelah siswa menyelesaikan DASS-21.')
-                ->required(fn (Get $get): bool => $get('category') === Recommendation::COUNSELING_SCRIPT_CATEGORY)
+                ->visible(fn (Get $get): bool => in_array($get('category'), [Recommendation::COUNSELING_SCRIPT_CATEGORY, Recommendation::DASHBOARD_ANALYSIS_CATEGORY], true))
+                ->helperText('Sistem memakai status ini untuk memilih konten otomatis setelah siswa menyelesaikan DASS-21.')
+                ->required(fn (Get $get): bool => in_array($get('category'), [Recommendation::COUNSELING_SCRIPT_CATEGORY, Recommendation::DASHBOARD_ANALYSIS_CATEGORY], true))
+                ->columnSpanFull(),
+            TagsInput::make('main_points')
+                ->label('Isi utama analisis')
+                ->placeholder('Tulis satu poin lalu tekan Enter')
+                ->helperText('Isi poin-poin utama yang tampil di bagian Analisis Data dashboard.')
+                ->visible(fn (Get $get): bool => $get('category') === Recommendation::DASHBOARD_ANALYSIS_CATEGORY)
+                ->required(fn (Get $get): bool => $get('category') === Recommendation::DASHBOARD_ANALYSIS_CATEGORY)
+                ->columnSpanFull(),
+            Textarea::make('education_message')
+                ->label('Pesan edukasi singkat')
+                ->placeholder('Contoh: Gejala masih ringan, tetapi perlu dipantau agar tidak bertambah berat.')
+                ->helperText('Kalimat pendek yang tampil sebagai pesan edukasi di dashboard.')
+                ->rows(3)
+                ->autosize()
+                ->visible(fn (Get $get): bool => $get('category') === Recommendation::DASHBOARD_ANALYSIS_CATEGORY)
+                ->required(fn (Get $get): bool => $get('category') === Recommendation::DASHBOARD_ANALYSIS_CATEGORY)
                 ->columnSpanFull(),
             Textarea::make('description')
-                ->label('Deskripsi / skrip')
+                ->label(fn (Get $get): string => $get('category') === Recommendation::DASHBOARD_ANALYSIS_CATEGORY
+                    ? 'Ringkasan internal'
+                    : 'Deskripsi / skrip')
                 ->placeholder(fn (Get $get): string => $get('category') === Recommendation::COUNSELING_SCRIPT_CATEGORY
                     ? 'Contoh: Hasil skrining menunjukkan gejala sedang. Saya menyarankan Anda berkonsultasi...'
-                    : 'Contoh: Tarik napas selama 4 detik, tahan sebentar, lalu hembuskan perlahan.')
-                ->helperText('Teks ini akan dibaca siswa. Hindari istilah teknis yang sulit dipahami.')
+                    : ($get('category') === Recommendation::DASHBOARD_ANALYSIS_CATEGORY
+                        ? 'Contoh: Ringkasan isi utama analisis dashboard.'
+                        : 'Contoh: Tarik napas selama 4 detik, tahan sebentar, lalu hembuskan perlahan.'))
+                ->helperText(fn (Get $get): string => $get('category') === Recommendation::DASHBOARD_ANALYSIS_CATEGORY
+                    ? 'Dipakai sebagai ringkasan cadangan bila poin utama belum tersedia.'
+                    : 'Teks ini akan dibaca siswa. Hindari istilah teknis yang sulit dipahami.')
                 ->rows(8)
                 ->autosize()
                 ->required()

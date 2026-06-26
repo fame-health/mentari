@@ -26,6 +26,25 @@ class RecommendationInfolist
                         'md' => 3,
                     ])
                     ->schema([
+                        TextEntry::make('main_points')
+                            ->label('Isi utama')
+                            ->state(fn (Recommendation $record): string => self::formatPoints($record->main_points))
+                            ->html()
+                            ->prose()
+                            ->placeholder('Poin utama belum tersedia.')
+                            ->visible(fn (Recommendation $record): bool => $record->category === Recommendation::DASHBOARD_ANALYSIS_CATEGORY)
+                            ->columnSpanFull(),
+                        TextEntry::make('education_message')
+                            ->label('Pesan edukasi singkat')
+                            ->formatStateUsing(fn (?string $state): string => self::formatMultiline($state))
+                            ->html()
+                            ->prose()
+                            ->size(TextSize::Medium)
+                            ->weight(FontWeight::Medium)
+                            ->color('gray')
+                            ->placeholder('Pesan edukasi belum tersedia.')
+                            ->visible(fn (Recommendation $record): bool => $record->category === Recommendation::DASHBOARD_ANALYSIS_CATEGORY)
+                            ->columnSpanFull(),
                         TextEntry::make('description')
                             ->hiddenLabel()
                             ->formatStateUsing(fn (?string $state): string => self::formatMultiline($state))
@@ -35,6 +54,7 @@ class RecommendationInfolist
                             ->weight(FontWeight::Medium)
                             ->color('gray')
                             ->placeholder('Isi rekomendasi belum tersedia.')
+                            ->visible(fn (Recommendation $record): bool => $record->category !== Recommendation::DASHBOARD_ANALYSIS_CATEGORY)
                             ->columnSpanFull(),
                         TextEntry::make('category')
                             ->label('Jenis')
@@ -115,6 +135,7 @@ class RecommendationInfolist
     {
         return match ($category) {
             Recommendation::COUNSELING_SCRIPT_CATEGORY => 'info',
+            Recommendation::DASHBOARD_ANALYSIS_CATEGORY => 'primary',
             'relaxation' => 'success',
             'reflection' => 'warning',
             default => 'gray',
@@ -125,6 +146,7 @@ class RecommendationInfolist
     {
         return match ($category) {
             Recommendation::COUNSELING_SCRIPT_CATEGORY => 'heroicon-o-chat-bubble-left-right',
+            Recommendation::DASHBOARD_ANALYSIS_CATEGORY => 'heroicon-o-chart-bar-square',
             'relaxation' => 'heroicon-o-sparkles',
             'reflection' => 'heroicon-o-pencil-square',
             'activity' => 'heroicon-o-bolt',
@@ -191,5 +213,17 @@ class RecommendationInfolist
     private static function formatMultiline(?string $text): string
     {
         return blank($text) ? '' : nl2br(e($text));
+    }
+
+    private static function formatPoints(?array $points): string
+    {
+        if (blank($points)) {
+            return '';
+        }
+
+        return '<ul>'.collect($points)
+            ->filter()
+            ->map(fn (string $point): string => '<li>'.e($point).'</li>')
+            ->join('').'</ul>';
     }
 }

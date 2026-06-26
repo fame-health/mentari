@@ -23,17 +23,31 @@ class DashboardController extends Controller
                 'stress' => $latestScreening->stress_severity,
             ])
             : null;
+        $analysisResource = $highestSeverity
+            ? Recommendation::dashboardAnalysisForSeverity($highestSeverity)
+            : null;
+        $screeningAnalysis = $highestSeverity
+            ? $this->scoring->dashboardAnalysisForSeverity($highestSeverity, $analysisResource?->toDashboardAnalysisContent())
+            : null;
+
+        if ($latestScreening) {
+            $latestScreening->setAttribute('analysis', $screeningAnalysis);
+        }
 
         return response()->json([
             'data' => [
                 'user' => $user->load('school'),
                 'latest_mood' => $user->moodEntries()->with('moodOption')->latest('entry_date')->first(),
                 'latest_screening' => $latestScreening,
+                'screening_analysis' => $screeningAnalysis,
                 'active_risk_alerts' => $user->riskAlerts()->whereNull('dismissed_at')->latest()->get(),
                 'personalized_recommendation' => $latestScreening?->recommendation
                     ?? Recommendation::counselingScriptForSeverity($highestSeverity),
                 'recommendations' => Recommendation::where('is_active', true)
-                    ->where('category', '!=', Recommendation::COUNSELING_SCRIPT_CATEGORY)
+                    ->whereNotIn('category', [
+                        Recommendation::COUNSELING_SCRIPT_CATEGORY,
+                        Recommendation::DASHBOARD_ANALYSIS_CATEGORY,
+                    ])
                     ->orderByRaw("CASE WHEN priority = 'high' THEN 1 WHEN priority = 'medium' THEN 2 ELSE 3 END")
                     ->limit(5)
                     ->get(),

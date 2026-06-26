@@ -34,7 +34,8 @@ class AdminRecommendationResourceTest extends TestCase
             ->assertSee('Buat Rekomendasi')
             ->assertSee('Rekomendasi ini untuk apa?')
             ->assertSee('Jenis rekomendasi')
-            ->assertSee('Skrip konseling singkat');
+            ->assertSee('Skrip konseling singkat')
+            ->assertSee('Analisis dashboard');
     }
 
     public function test_admin_can_open_the_compact_recommendation_view_page(): void

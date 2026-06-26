@@ -199,5 +199,86 @@ class DatabaseSeeder extends Seeder
                 ],
             );
         }
+
+        $dashboardAnalyses = [
+            [
+                'title' => 'Hasil Skrining Normal',
+                'severity' => 'normal',
+                'main_points' => [
+                    'Hasil Anda berada pada rentang normal.',
+                    'Ini berarti saat ini tidak tampak gejala depresi, kecemasan, atau stres yang bermakna.',
+                    'Tetap jaga pola tidur, makan seimbang, aktivitas fisik, dan hubungan sosial.',
+                    'Lakukan skrining ulang bila muncul keluhan baru.',
+                ],
+                'education_message' => 'Status Anda masih baik. Pertahankan kebiasaan sehat dan tetap perhatikan perubahan suasana hati.',
+                'accent_color' => '#22C55E',
+            ],
+            [
+                'title' => 'Gejala Ringan',
+                'severity' => 'mild',
+                'main_points' => [
+                    'Anda menunjukkan tanda awal gangguan emosi.',
+                    'Gejala ringan bisa membaik dengan perbaikan gaya hidup dan dukungan sosial.',
+                    'Coba tidur cukup, olahraga rutin, kurangi begadang, dan lakukan relaksasi napas.',
+                    'Amati kondisi selama 2-4 minggu.',
+                ],
+                'education_message' => 'Gejala masih ringan, tetapi perlu dipantau agar tidak bertambah berat.',
+                'accent_color' => '#38BDF8',
+            ],
+            [
+                'title' => 'Gejala Sedang',
+                'severity' => 'moderate',
+                'main_points' => [
+                    'Gejala yang muncul sudah cukup mengganggu aktivitas harian.',
+                    'Disarankan berkonsultasi dengan psikolog atau layanan kesehatan mental.',
+                    'Catat pemicu stres, kelola waktu istirahat, dan hindari beban berlebih.',
+                    'Dukungan keluarga dan teman sangat membantu.',
+                ],
+                'education_message' => 'Gejala Anda perlu ditangani lebih lanjut agar tidak berkembang menjadi lebih berat.',
+                'accent_color' => '#F59E0B',
+            ],
+            [
+                'title' => 'Gejala Berat',
+                'severity' => 'severe',
+                'main_points' => [
+                    'Gejala yang muncul berada pada tingkat berat dan kemungkinan besar mengganggu fungsi harian.',
+                    'Segera cari dukungan profesional dari psikolog, psikiater, guru BK, atau fasilitas kesehatan.',
+                    'Kurangi aktivitas yang membebani dan pastikan ada pendamping tepercaya.',
+                    'Jika muncul pikiran untuk menyakiti diri atau merasa tidak aman, segera hubungi bantuan darurat atau fasilitas kesehatan terdekat.',
+                ],
+                'education_message' => 'Gejala Anda membutuhkan dukungan profesional segera. Keselamatan dan pendampingan adalah prioritas utama.',
+                'accent_color' => '#EF4444',
+            ],
+            [
+                'title' => 'Gejala Sangat Berat',
+                'severity' => 'extremely_severe',
+                'main_points' => [
+                    'Hasil skrining menunjukkan gejala sangat berat.',
+                    'Kondisi ini memerlukan penanganan segera dari tenaga profesional kesehatan mental.',
+                    'Pastikan ada pendamping dari orang terdekat dan segera arahkan ke layanan kesehatan jiwa atau unit gawat darurat.',
+                    'Jika ada risiko menyakiti diri, jangan menunggu dan segera cari bantuan darurat.',
+                ],
+                'education_message' => 'Kondisi sangat berat perlu ditangani segera. Pastikan ada pendamping dan hubungi layanan profesional atau darurat.',
+                'accent_color' => '#B91C1C',
+            ],
+        ];
+
+        foreach ($dashboardAnalyses as $analysis) {
+            Recommendation::updateOrCreate(
+                [
+                    'category' => Recommendation::DASHBOARD_ANALYSIS_CATEGORY,
+                    'severity' => $analysis['severity'],
+                ],
+                [
+                    ...$analysis,
+                    'category' => Recommendation::DASHBOARD_ANALYSIS_CATEGORY,
+                    'description' => implode("\n", $analysis['main_points']),
+                    'duration_minutes' => null,
+                    'duration_label' => 'Analisis dashboard',
+                    'priority' => 'personalized',
+                    'is_active' => true,
+                ],
+            );
+        }
     }
 }

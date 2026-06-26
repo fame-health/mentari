@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Recommendation;
 use App\Models\ScreeningQuestion;
+use App\Models\ScreeningResult;
 use App\Models\User;
 use App\Services\Dass21ScoringService;
 use Illuminate\Http\JsonResponse;
@@ -25,13 +26,17 @@ class ScreeningController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        return response()->json(
-            $request->user()
-                ->screeningResults()
-                ->with(['riskAlert', 'recommendation'])
-                ->latest('taken_at')
-                ->paginate(min($request->integer('per_page', 20), 100)),
-        );
+        $results = $request->user()
+            ->screeningResults()
+            ->with(['riskAlert', 'recommendation'])
+            ->latest('taken_at')
+            ->paginate(min($request->integer('per_page', 20), 100));
+
+        $results->getCollection()->transform(function (ScreeningResult $result): ScreeningResult {
+            return $this->withDashboardAnalysis($result);
+        });
+
+        return response()->json($results);
     }
 
     public function store(Request $request): JsonResponse
@@ -108,9 +113,29 @@ class ScreeningController extends Controller
             return $result;
         });
 
+        $result = $this->withDashboardAnalysis($result->load(['answers.question', 'riskAlert', 'recommendation']));
+
         return response()->json([
             'message' => 'Screening berhasil disimpan.',
-            'data' => $result->load(['answers.question', 'riskAlert', 'recommendation']),
+            'data' => $result,
         ], 201);
+    }
+
+    private function withDashboardAnalysis(ScreeningResult $result): ScreeningResult
+    {
+        $highestSeverity = $this->scoring->highestSeverity([
+            'depression' => $result->depression_severity,
+            'anxiety' => $result->anxiety_severity,
+            'stress' => $result->stress_severity,
+        ]);
+        $analysisResource = Recommendation::dashboardAnalysisForSeverity($highestSeverity);
+
+        $result->setAttribute('analysis', $this->scoring->dashboardAnalysis([
+            'depression' => $result->depression_severity,
+            'anxiety' => $result->anxiety_severity,
+            'stress' => $result->stress_severity,
+        ], $analysisResource?->toDashboardAnalysisContent()));
+
+        return $result;
     }
 }

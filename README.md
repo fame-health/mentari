@@ -202,9 +202,26 @@ Ambil pertanyaan dari `/screening/questions`, lalu kirim seluruh pertanyaan akti
 }
 ```
 
-Nilai jawaban harus `0` sampai `3`. Backend menghitung skor depresi, kecemasan, dan stres, memilih rekomendasi personalisasi berdasarkan severity tertinggi, serta membuat alert bila hasil memerlukan perhatian.
+Nilai jawaban harus `0` sampai `3`. Backend menghitung skor depresi, kecemasan, dan stres, memilih analisis dashboard serta rekomendasi personalisasi berdasarkan severity tertinggi, serta membuat alert bila hasil memerlukan perhatian.
 
-Response `POST /screening/results` memuat relasi `recommendation` bila ada skrip yang cocok. Untuk mengambil skrip konseling langsung, gunakan:
+Response `POST /screening/results` memuat `analysis` untuk bagian Analisis Data dan relasi `recommendation` bila ada skrip yang cocok. Endpoint `GET /dashboard` juga memuat `screening_analysis` dan `latest_screening.analysis`.
+Konten `analysis` dapat dikelola admin melalui menu Rekomendasi dengan jenis `Analisis dashboard`; backend akan memakai data aktif dari database sesuai status DASS-21, lalu memakai teks bawaan bila data belum tersedia.
+
+Format ringkas `analysis`:
+
+```json
+{
+  "severity": "moderate",
+  "severity_label": "Sedang",
+  "title": "Gejala Sedang",
+  "main_points": [
+    "Gejala yang muncul sudah cukup mengganggu aktivitas harian."
+  ],
+  "education_message": "Gejala Anda perlu ditangani lebih lanjut agar tidak berkembang menjadi lebih berat."
+}
+```
+
+Untuk mengambil skrip konseling langsung, gunakan:
 
 ```http
 GET /api/v1/recommendations?category=counseling_script&severity=moderate

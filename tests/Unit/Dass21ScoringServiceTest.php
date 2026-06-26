@@ -52,4 +52,24 @@ class Dass21ScoringServiceTest extends TestCase
             'stress' => 'moderate',
         ]));
     }
+
+    public function test_dashboard_analysis_uses_the_highest_severity_copy(): void
+    {
+        $service = new Dass21ScoringService;
+
+        $analysis = $service->dashboardAnalysis([
+            'depression' => 'normal',
+            'anxiety' => 'moderate',
+            'stress' => 'mild',
+        ]);
+
+        $this->assertSame('moderate', $analysis['severity']);
+        $this->assertSame('Sedang', $analysis['severity_label']);
+        $this->assertSame('Gejala Sedang', $analysis['title']);
+        $this->assertContains('Gejala yang muncul sudah cukup mengganggu aktivitas harian.', $analysis['main_points']);
+        $this->assertSame(
+            'Gejala Anda perlu ditangani lebih lanjut agar tidak berkembang menjadi lebih berat.',
+            $analysis['education_message'],
+        );
+    }
 }

@@ -30,6 +30,18 @@ class DashboardApiTest extends TestCase
             'priority' => 'high',
             'is_active' => true,
         ]);
+        Recommendation::create([
+            'title' => 'Analisis Sedang dari Admin',
+            'category' => Recommendation::DASHBOARD_ANALYSIS_CATEGORY,
+            'severity' => 'moderate',
+            'description' => 'Analisis sedang yang dikelola admin.',
+            'main_points' => [
+                'Poin analisis dashboard dari admin.',
+            ],
+            'education_message' => 'Pesan edukasi dashboard dari admin.',
+            'priority' => 'personalized',
+            'is_active' => true,
+        ]);
 
         $user->screeningResults()->create([
             'taken_at' => now(),
@@ -46,6 +58,9 @@ class DashboardApiTest extends TestCase
         $this->getJson('/api/v1/dashboard')
             ->assertOk()
             ->assertJsonPath('data.latest_screening.recommendation.severity', 'moderate')
+            ->assertJsonPath('data.latest_screening.analysis.title', 'Analisis Sedang dari Admin')
+            ->assertJsonPath('data.latest_screening.analysis.main_points.0', 'Poin analisis dashboard dari admin.')
+            ->assertJsonPath('data.screening_analysis.education_message', 'Pesan edukasi dashboard dari admin.')
             ->assertJsonPath('data.personalized_recommendation.severity', 'moderate')
             ->assertJsonPath('data.recommendations.0.category', 'relaxation');
     }
