@@ -4,7 +4,8 @@ use App\Http\Controllers\Admin\SchoolScreeningExportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    $schools = \App\Models\School::orderBy('name')->get();
+    return view('welcome', compact('schools'));
 });
 
 Route::middleware('auth')->prefix('admin/screening-results/school/{school}')->group(function (): void {
