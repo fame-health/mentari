@@ -11,27 +11,51 @@ class SchoolScreeningStats extends StatsOverviewWidget
 {
     public ?int $schoolId = null;
 
-    protected int|string|array $columnSpan = 'full';
+    protected int|string|array $columnSpan = [
+        'default' => 'full',
+    ];
+
+    protected function getColumns(): int|array|null
+    {
+        return [
+            'default' => 1,
+            'sm' => 2,
+            'xl' => 4,
+        ];
+    }
 
     protected function getStats(): array
     {
         $summary = app(SchoolScreeningReportData::class)->summary($this->schoolId);
 
         return [
-            Stat::make('Total siswa', Number::format($summary['student_count']))
-                ->description('Siswa terdaftar di sekolah')
-                ->icon('heroicon-o-users')
+            Stat::make('Total Siswa Terdaftar', Number::format($summary['student_count']))
+                ->extraAttributes(['class' => 'mentari-school-stat mentari-school-stat--students'])
+                ->description('Siswa aktif di sekolah ini')
+                ->icon('heroicon-o-user-group')
                 ->color('primary'),
-            Stat::make('Total screening', Number::format($summary['screening_count']))
-                ->description(Number::format($summary['monthly_screenings']).' dilakukan bulan ini')
+
+            Stat::make('Total Screening Dilakukan', Number::format($summary['screening_count']))
+                ->extraAttributes(['class' => 'mentari-school-stat mentari-school-stat--screenings'])
+                ->description(Number::format($summary['monthly_screenings']).' screening dilakukan bulan ini')
                 ->icon('heroicon-o-clipboard-document-check')
                 ->color('info'),
-            Stat::make('Cakupan screening', $summary['coverage'].'%')
-                ->description(Number::format($summary['screened_students']).' dari '.Number::format($summary['student_count']).' siswa pernah screening')
+
+            Stat::make('Cakupan Siswa Terscreening', $summary['coverage'].'%')
+                ->extraAttributes(['class' => 'mentari-school-stat mentari-school-stat--coverage'])
+                ->description(
+                    Number::format($summary['screened_students']).' dari '.Number::format($summary['student_count']).' siswa pernah mengikuti screening'
+                )
                 ->icon('heroicon-o-chart-pie')
                 ->color($summary['coverage'] >= 75 ? 'success' : ($summary['coverage'] >= 40 ? 'warning' : 'danger')),
-            Stat::make('Alert aktif', Number::format($summary['active_alerts']))
-                ->description(Number::format($summary['urgent_alerts']).' alert urgent')
+
+            Stat::make('Alert Belum Ditangani', Number::format($summary['active_alerts']))
+                ->extraAttributes(['class' => 'mentari-school-stat mentari-school-stat--alerts'])
+                ->description(
+                    $summary['urgent_alerts'] > 0
+                        ? Number::format($summary['urgent_alerts']).' alert berstatus URGENT - perlu tindak lanjut segera'
+                        : 'Tidak ada alert urgent saat ini'
+                )
                 ->icon('heroicon-o-exclamation-triangle')
                 ->color($summary['urgent_alerts'] > 0 ? 'danger' : ($summary['active_alerts'] > 0 ? 'warning' : 'success')),
         ];

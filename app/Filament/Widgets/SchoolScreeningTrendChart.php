@@ -10,11 +10,17 @@ class SchoolScreeningTrendChart extends ChartWidget
 {
     public ?int $schoolId = null;
 
-    protected ?string $heading = 'Tren Skor Rata-rata 6 Bulan';
+    protected ?string $heading = 'Tren Rata-rata Skor DASS-21 (6 Bulan Terakhir)';
 
-    protected ?string $description = 'Perubahan rata-rata skor depresi, kecemasan, dan stres setiap bulan.';
+    protected ?string $description = 'Grafik ini menampilkan perubahan rata-rata skor Depresi, Kecemasan, dan Stres setiap bulan. Skor yang meningkat mengindikasikan kondisi yang perlu perhatian lebih.';
 
-    protected ?string $maxHeight = '340px';
+    protected ?string $maxHeight = '300px';
+
+    protected int|string|array $columnSpan = [
+        'default' => 'full',
+        'md' => 6,
+        'xl' => 7,
+    ];
 
     protected function getData(): array
     {

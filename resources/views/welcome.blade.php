@@ -44,6 +44,13 @@
                 radial-gradient(at 90% 10%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
                 radial-gradient(at 50% 80%, rgba(99, 102, 241, 0.05) 0px, transparent 50%);
         }
+        @keyframes marqueeScroll {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .marquee-track:hover {
+            animation-play-state: paused;
+        }
     </style>
 </head>
 <body class="mesh-gradient font-sans text-slate-800 antialiased min-h-screen selection:bg-pink-200 selection:text-pink-900 overflow-x-hidden w-full">
@@ -250,6 +257,90 @@
 
                 </div>
             </div>
+        </section>
+
+        <!-- DAFTAR SEKOLAH TERDAFTAR SECTION -->
+        <section id="sekolah" class="py-16 relative overflow-hidden bg-white/50 backdrop-blur-sm border-b border-slate-100">
+            <div class="mx-auto max-w-7xl px-6 mb-10">
+                <div class="text-center">
+                    <p class="text-xs font-bold uppercase tracking-widest text-indigo-500">Ekosistem MENTARI</p>
+                    <h2 class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                        Sekolah yang Telah Bergabung
+                    </h2>
+                    <p class="mt-3 text-base text-slate-500 max-w-xl mx-auto">
+                        Ratusan siswa dari berbagai sekolah telah menggunakan MENTARI sebagai platform pendampingan kesehatan mental mereka.
+                    </p>
+                </div>
+            </div>
+
+            @if($schools->isEmpty())
+                <div class="text-center py-10">
+                    <div class="inline-flex size-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-400 mb-4">
+                        <svg class="size-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
+                        </svg>
+                    </div>
+                    <p class="text-slate-500 font-semibold">Belum ada sekolah terdaftar.</p>
+                    <p class="text-sm text-slate-400 mt-1">Daftarkan sekolah Anda melalui dashboard admin.</p>
+                </div>
+            @else
+                <!-- Marquee Wrapper (infinite scroll) -->
+                <div class="relative overflow-hidden" style="mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%); -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);">
+                    <div class="flex gap-5 marquee-track" style="width: max-content; animation: marqueeScroll 30s linear infinite;">
+                        @foreach($schools as $school)
+                            <div class="flex items-center gap-4 bg-white rounded-2xl border border-slate-200 px-6 py-4 shadow-sm min-w-[260px] shrink-0 hover:border-indigo-300 hover:shadow-md transition duration-300 group">
+                                <div class="size-11 rounded-xl bg-gradient-to-br from-pink-500 to-indigo-600 flex items-center justify-center text-white font-extrabold text-lg shadow-sm shrink-0 group-hover:scale-105 transition">
+                                    {{ strtoupper(substr($school->name, 0, 1)) }}
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="font-bold text-slate-800 text-sm truncate">{{ $school->name }}</p>
+                                    @if($school->address)
+                                        <p class="text-xs text-slate-400 truncate mt-0.5">{{ $school->address }}</p>
+                                    @endif
+                                    <span class="inline-flex items-center gap-1 mt-1 text-[10px] font-bold uppercase tracking-wider text-indigo-500 bg-indigo-50 rounded-full px-2 py-0.5">
+                                        <span class="size-1.5 rounded-full bg-indigo-500"></span>
+                                        Aktif
+                                    </span>
+                                </div>
+                            </div>
+                        @endforeach
+                        {{-- Duplicate the list for seamless loop --}}
+                        @foreach($schools as $school)
+                            <div class="flex items-center gap-4 bg-white rounded-2xl border border-slate-200 px-6 py-4 shadow-sm min-w-[260px] shrink-0 hover:border-indigo-300 hover:shadow-md transition duration-300 group">
+                                <div class="size-11 rounded-xl bg-gradient-to-br from-pink-500 to-indigo-600 flex items-center justify-center text-white font-extrabold text-lg shadow-sm shrink-0 group-hover:scale-105 transition">
+                                    {{ strtoupper(substr($school->name, 0, 1)) }}
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="font-bold text-slate-800 text-sm truncate">{{ $school->name }}</p>
+                                    @if($school->address)
+                                        <p class="text-xs text-slate-400 truncate mt-0.5">{{ $school->address }}</p>
+                                    @endif
+                                    <span class="inline-flex items-center gap-1 mt-1 text-[10px] font-bold uppercase tracking-wider text-indigo-500 bg-indigo-50 rounded-full px-2 py-0.5">
+                                        <span class="size-1.5 rounded-full bg-indigo-500"></span>
+                                        Aktif
+                                    </span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Total Schools Badge -->
+                <div class="mt-10 text-center">
+                    <div class="inline-flex items-center gap-3 rounded-2xl border border-indigo-100 bg-indigo-50 px-6 py-3">
+                        <div class="size-8 rounded-full bg-gradient-to-br from-pink-500 to-indigo-600 flex items-center justify-center text-white">
+                            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
+                            </svg>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-sm font-extrabold text-slate-900">{{ $schools->count() }} Sekolah Aktif</p>
+                            <p class="text-xs text-slate-500">Bergabung dalam ekosistem MENTARI</p>
+                        </div>
+                        <a href="/admin" class="ml-2 text-xs font-bold text-indigo-600 hover:underline">Daftarkan Sekolah →</a>
+                    </div>
+                </div>
+            @endif
         </section>
 
         <!-- ALUR DUKUNGAN (TIMELINE) SECTION -->

@@ -9,6 +9,7 @@ use App\Filament\Widgets\SchoolSeverityDistributionChart;
 use App\Models\School;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -17,6 +18,8 @@ class ListSchoolScreeningResults extends ListRecords
     protected static string $resource = ScreeningResultResource::class;
 
     public School $school;
+
+    protected Width|string|null $maxContentWidth = Width::Full;
 
     public function mount(): void
     {
@@ -30,7 +33,7 @@ class ListSchoolScreeningResults extends ListRecords
 
     public function getTitle(): string|Htmlable
     {
-        return 'Hasil Screening — '.$this->school->name;
+        return 'Hasil Screening - '.$this->school->name;
     }
 
     public function getSubheading(): string|Htmlable|null
@@ -86,7 +89,16 @@ class ListSchoolScreeningResults extends ListRecords
     {
         return [
             'default' => 1,
-            'lg' => 2,
+            'md' => 6,
+            'xl' => 12,
+        ];
+    }
+
+    public function getPageClasses(): array
+    {
+        return [
+            ...parent::getPageClasses(),
+            'mentari-school-screening-results',
         ];
     }
 

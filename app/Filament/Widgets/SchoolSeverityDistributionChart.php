@@ -10,11 +10,17 @@ class SchoolSeverityDistributionChart extends ChartWidget
 {
     public ?int $schoolId = null;
 
-    protected ?string $heading = 'Distribusi Tingkat Keparahan';
+    protected ?string $heading = 'Distribusi Tingkat Keparahan DASS-21';
 
-    protected ?string $description = 'Jumlah hasil pada setiap kategori DASS-21.';
+    protected ?string $description = 'Jumlah hasil screening pada setiap kategori (Normal, Ringan, Sedang, Berat, Sangat Berat) untuk Depresi, Kecemasan, dan Stres.';
 
-    protected ?string $maxHeight = '340px';
+    protected ?string $maxHeight = '300px';
+
+    protected int|string|array $columnSpan = [
+        'default' => 'full',
+        'md' => 6,
+        'xl' => 5,
+    ];
 
     protected function getData(): array
     {
