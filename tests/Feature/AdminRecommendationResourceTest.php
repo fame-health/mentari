@@ -19,9 +19,40 @@ class AdminRecommendationResourceTest extends TestCase
             ->get('/admin/recommendations')
             ->assertOk()
             ->assertSee('Rekomendasi')
+            ->assertSee('Pilih Jenis Rekomendasi')
+            ->assertSee('Daftar Rekomendasi')
+            ->assertSee('Skrip konseling singkat')
+            ->assertSee('Analisis dashboard');
+    }
+
+    public function test_admin_can_open_recommendation_data_after_choosing_a_type(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        Recommendation::create([
+            'title' => 'Skrip konseling terpilih',
+            'category' => Recommendation::COUNSELING_SCRIPT_CATEGORY,
+            'severity' => 'moderate',
+            'description' => 'Isi skrip konseling.',
+            'is_active' => true,
+        ]);
+
+        Recommendation::create([
+            'title' => 'Analisis dashboard lain',
+            'category' => Recommendation::DASHBOARD_ANALYSIS_CATEGORY,
+            'severity' => 'moderate',
+            'description' => 'Isi analisis dashboard.',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/recommendations?category='.Recommendation::COUNSELING_SCRIPT_CATEGORY)
+            ->assertOk()
+            ->assertSee('Skrip konseling singkat')
             ->assertSee('Judul')
-            ->assertSee('Jenis')
-            ->assertSee('Aktif');
+            ->assertSee('Aktif')
+            ->assertSee('Skrip konseling terpilih')
+            ->assertDontSee('Analisis dashboard lain');
     }
 
     public function test_admin_can_open_the_improved_recommendation_create_page(): void

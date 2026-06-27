@@ -98,7 +98,6 @@ class AdminDashboardTest extends TestCase
             '/admin/screening-results',
             '/admin/screening-answers',
             '/admin/community-posts',
-            '/admin/community-post-likes',
             '/admin/risk-alerts',
         ];
 

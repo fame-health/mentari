@@ -181,9 +181,14 @@ class SchoolsTable
                     }),
                 ViewAction::make()
                     ->label('Lihat')
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
                     ->modalHeading(fn ($record): string => 'Ringkasan '.$record->name)
-                    ->modalDescription('Data sekolah dan jawaban otomatis dari sistem.')
-                    ->modalWidth(Width::ThreeExtraLarge),
+                    ->modalDescription('Profil sekolah, kelas, dan ringkasan data terbaru.')
+                    ->modalIcon('heroicon-o-building-office-2')
+                    ->modalIconColor('info')
+                    ->modalWidth(Width::FiveExtraLarge)
+                    ->stickyModalHeader(),
                 EditAction::make()
                     ->label('Edit')
                     ->modalHeading(fn ($record): string => 'Edit '.$record->name)

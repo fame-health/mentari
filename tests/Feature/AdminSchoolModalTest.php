@@ -22,22 +22,29 @@ class AdminSchoolModalTest extends TestCase
 
         $this->assertNull($component->instance()->getAction('create')->getUrl());
 
-        $component->callAction('create', data: [
-            'name' => 'SMA Negeri 1 Mentari',
-            'address' => 'Jl. Mentari No. 1',
-            'classrooms' => [
-                [
-                    'name' => 'X IPA 1',
-                    'sort_order' => 1,
-                    'is_active' => true,
+        $component
+            ->mountAction('create')
+            ->assertWizardStepExists(1)
+            ->assertWizardStepExists(2);
+
+        Livewire::actingAs($admin)
+            ->test(ListSchools::class)
+            ->callAction('create', data: [
+                'name' => 'SMA Negeri 1 Mentari',
+                'address' => 'Jl. Mentari No. 1',
+                'classrooms' => [
+                    [
+                        'name' => 'X IPA 1',
+                        'sort_order' => 1,
+                        'is_active' => true,
+                    ],
+                    [
+                        'name' => 'XI IPA 1',
+                        'sort_order' => 2,
+                        'is_active' => true,
+                    ],
                 ],
-                [
-                    'name' => 'XI IPA 1',
-                    'sort_order' => 2,
-                    'is_active' => true,
-                ],
-            ],
-        ]);
+            ]);
 
         $this->assertDatabaseHas('schools', [
             'name' => 'SMA Negeri 1 Mentari',
@@ -85,6 +92,40 @@ class AdminSchoolModalTest extends TestCase
             'code' => 'SMP-MENTARI',
             'address' => 'Jl. Pelajar No. 3',
         ]);
+    }
+
+    public function test_view_school_modal_shows_polished_overview(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $school = School::create([
+            'name' => 'SMA Mentari Visual',
+            'address' => 'Jl. Modal Rapi No. 4',
+        ]);
+
+        $school->classrooms()->create([
+            'name' => 'X IPA 1',
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+        $school->classrooms()->create([
+            'name' => 'XI IPS 1',
+            'sort_order' => 2,
+            'is_active' => false,
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(ListSchools::class)
+            ->mountTableAction('view', $school)
+            ->assertMountedActionModalSee([
+                'Profil sekolah',
+                'SMA Mentari Visual',
+                'Jl. Modal Rapi No. 4',
+                'Daftar kelas',
+                'X IPA 1',
+                'XI IPS 1',
+                'Riwayat data',
+                'Alert aktif',
+            ]);
     }
 
     public function test_admin_can_add_multiple_classes_from_a_school_row(): void

@@ -108,24 +108,35 @@
 
         .user-flow-choice {
             display: flex;
+            position: relative;
             width: 100%;
             min-height: 6.25rem;
             align-items: center;
             justify-content: space-between;
             gap: 1rem;
             padding: 1rem;
-            border: 1px solid rgb(229 231 235);
+            overflow: hidden;
+            border: 1px solid var(--user-flow-border, rgb(229 231 235));
             border-radius: .5rem;
-            background: rgb(255 255 255);
+            background: var(--user-flow-surface, rgb(255 255 255));
             color: rgb(17 24 39);
             text-align: left;
+            box-shadow: 0 1px 2px rgb(15 23 42 / .05);
             transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
         }
 
+        .user-flow-choice::before {
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: .35rem;
+            background: var(--user-flow-accent, rgb(14 165 233));
+            content: "";
+        }
+
         .user-flow-choice:hover {
-            border-color: rgb(14 165 233);
-            box-shadow: 0 4px 14px rgb(15 23 42 / .08);
-            transform: translateY(-1px);
+            border-color: var(--user-flow-accent, rgb(14 165 233));
+            box-shadow: 0 10px 24px rgb(15 23 42 / .12);
+            transform: translateY(-2px);
         }
 
         .user-flow-choice:focus-visible {
@@ -134,9 +145,63 @@
         }
 
         .dark .user-flow-choice {
-            border-color: rgb(55 65 81);
-            background: rgb(17 24 39);
+            border-color: var(--user-flow-border-dark, rgb(55 65 81));
+            background: var(--user-flow-surface-dark, rgb(17 24 39));
             color: rgb(243 244 246);
+        }
+
+        .user-flow-choice--sky {
+            --user-flow-accent: rgb(14 165 233);
+            --user-flow-border: rgb(186 230 253);
+            --user-flow-border-dark: rgb(12 74 110);
+            --user-flow-soft: rgb(224 242 254);
+            --user-flow-surface: linear-gradient(135deg, rgb(240 249 255), rgb(255 255 255) 62%);
+            --user-flow-surface-dark: linear-gradient(135deg, rgb(12 74 110 / .45), rgb(17 24 39) 62%);
+        }
+
+        .user-flow-choice--emerald {
+            --user-flow-accent: rgb(16 185 129);
+            --user-flow-border: rgb(167 243 208);
+            --user-flow-border-dark: rgb(6 95 70);
+            --user-flow-soft: rgb(209 250 229);
+            --user-flow-surface: linear-gradient(135deg, rgb(236 253 245), rgb(255 255 255) 62%);
+            --user-flow-surface-dark: linear-gradient(135deg, rgb(6 95 70 / .35), rgb(17 24 39) 62%);
+        }
+
+        .user-flow-choice--fuchsia {
+            --user-flow-accent: rgb(217 70 239);
+            --user-flow-border: rgb(245 208 254);
+            --user-flow-border-dark: rgb(112 26 117);
+            --user-flow-soft: rgb(250 232 255);
+            --user-flow-surface: linear-gradient(135deg, rgb(253 244 255), rgb(255 255 255) 62%);
+            --user-flow-surface-dark: linear-gradient(135deg, rgb(112 26 117 / .35), rgb(17 24 39) 62%);
+        }
+
+        .user-flow-choice--amber {
+            --user-flow-accent: rgb(245 158 11);
+            --user-flow-border: rgb(253 230 138);
+            --user-flow-border-dark: rgb(146 64 14);
+            --user-flow-soft: rgb(254 243 199);
+            --user-flow-surface: linear-gradient(135deg, rgb(255 251 235), rgb(255 255 255) 62%);
+            --user-flow-surface-dark: linear-gradient(135deg, rgb(146 64 14 / .35), rgb(17 24 39) 62%);
+        }
+
+        .user-flow-choice--indigo {
+            --user-flow-accent: rgb(99 102 241);
+            --user-flow-border: rgb(199 210 254);
+            --user-flow-border-dark: rgb(67 56 202);
+            --user-flow-soft: rgb(238 242 255);
+            --user-flow-surface: linear-gradient(135deg, rgb(238 242 255), rgb(255 255 255) 62%);
+            --user-flow-surface-dark: linear-gradient(135deg, rgb(67 56 202 / .35), rgb(17 24 39) 62%);
+        }
+
+        .user-flow-choice--slate {
+            --user-flow-accent: rgb(100 116 139);
+            --user-flow-border: rgb(203 213 225);
+            --user-flow-border-dark: rgb(71 85 105);
+            --user-flow-soft: rgb(241 245 249);
+            --user-flow-surface: linear-gradient(135deg, rgb(248 250 252), rgb(255 255 255) 62%);
+            --user-flow-surface-dark: linear-gradient(135deg, rgb(71 85 105 / .35), rgb(17 24 39) 62%);
         }
 
         .user-flow-choice-copy {
@@ -146,7 +211,7 @@
         .user-flow-choice-title {
             display: block;
             font-size: .95rem;
-            font-weight: 700;
+            font-weight: 800;
             line-height: 1.4;
         }
 
@@ -168,13 +233,15 @@
             flex: 0 0 2.25rem;
             place-items: center;
             border-radius: .5rem;
-            background: rgb(240 249 255);
-            color: rgb(2 132 199);
+            background: var(--user-flow-soft, rgb(240 249 255));
+            color: var(--user-flow-accent, rgb(2 132 199));
+            box-shadow: inset 0 0 0 1px rgb(255 255 255 / .7);
         }
 
         .dark .user-flow-choice-icon {
-            background: rgb(12 74 110 / .45);
-            color: rgb(125 211 252);
+            background: rgb(15 23 42 / .65);
+            color: var(--user-flow-accent, rgb(125 211 252));
+            box-shadow: inset 0 0 0 1px rgb(255 255 255 / .08);
         }
 
         .user-flow-choice-icon svg {
@@ -295,9 +362,15 @@
                 @else
                     <div class="user-flow-grid">
                         @foreach ($schools as $school)
+                            @php
+                                $schoolTone = $school['id'] === 0
+                                    ? 'slate'
+                                    : ['sky', 'emerald', 'fuchsia', 'amber', 'indigo'][$loop->index % 5];
+                            @endphp
+
                             <button
                                 type="button"
-                                class="user-flow-choice"
+                                class="user-flow-choice user-flow-choice--{{ $schoolTone }}"
                                 wire:click="selectSchool({{ $school['id'] }})"
                             >
                                 <span class="user-flow-choice-copy">
@@ -307,7 +380,7 @@
                                     </span>
                                 </span>
                                 <span class="user-flow-choice-icon">
-                                    <x-filament::icon icon="heroicon-o-chevron-right" />
+                                    <x-filament::icon icon="heroicon-o-building-office-2" />
                                 </span>
                             </button>
                         @endforeach
@@ -335,9 +408,15 @@
                 @else
                     <div class="user-flow-grid">
                         @foreach ($levels as $level)
+                            @php
+                                $levelTone = $level['value'] === '__empty__'
+                                    ? 'slate'
+                                    : ['emerald', 'sky', 'indigo', 'amber', 'fuchsia'][$loop->index % 5];
+                            @endphp
+
                             <button
                                 type="button"
-                                class="user-flow-choice"
+                                class="user-flow-choice user-flow-choice--{{ $levelTone }}"
                                 wire:click="selectLevel(@js($level['value']))"
                             >
                                 <span class="user-flow-choice-copy">
@@ -345,7 +424,7 @@
                                     <span class="user-flow-choice-meta">{{ $level['count'] }} pengguna</span>
                                 </span>
                                 <span class="user-flow-choice-icon">
-                                    <x-filament::icon icon="heroicon-o-chevron-right" />
+                                    <x-filament::icon icon="heroicon-o-academic-cap" />
                                 </span>
                             </button>
                         @endforeach

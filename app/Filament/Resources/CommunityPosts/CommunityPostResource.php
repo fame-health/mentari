@@ -2,10 +2,7 @@
 
 namespace App\Filament\Resources\CommunityPosts;
 
-use App\Filament\Resources\CommunityPosts\Pages\CreateCommunityPost;
-use App\Filament\Resources\CommunityPosts\Pages\EditCommunityPost;
 use App\Filament\Resources\CommunityPosts\Pages\ListCommunityPosts;
-use App\Filament\Resources\CommunityPosts\Pages\ViewCommunityPost;
 use App\Filament\Resources\CommunityPosts\Schemas\CommunityPostForm;
 use App\Filament\Resources\CommunityPosts\Schemas\CommunityPostInfolist;
 use App\Filament\Resources\CommunityPosts\Tables\CommunityPostsTable;
@@ -58,9 +55,6 @@ class CommunityPostResource extends Resource
     {
         return [
             'index' => ListCommunityPosts::route('/'),
-            'create' => CreateCommunityPost::route('/create'),
-            'view' => ViewCommunityPost::route('/{record}'),
-            'edit' => EditCommunityPost::route('/{record}/edit'),
         ];
     }
 

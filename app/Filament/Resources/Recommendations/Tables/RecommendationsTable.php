@@ -14,8 +14,23 @@ use Filament\Tables\Table;
 
 class RecommendationsTable
 {
-    public static function configure(Table $table): Table
+    public static function configure(Table $table, bool $includeCategoryFilter = true): Table
     {
+        $filters = [
+            SelectFilter::make('severity')
+                ->label('Status DASS-21')
+                ->options(Recommendation::SEVERITY_LABELS),
+        ];
+
+        if ($includeCategoryFilter) {
+            array_unshift(
+                $filters,
+                SelectFilter::make('category')
+                    ->label('Jenis rekomendasi')
+                    ->options(Recommendation::CATEGORY_LABELS),
+            );
+        }
+
         return $table
             ->columns([
                 TextColumn::make('title')
@@ -51,14 +66,7 @@ class RecommendationsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                SelectFilter::make('category')
-                    ->label('Jenis rekomendasi')
-                    ->options(Recommendation::CATEGORY_LABELS),
-                SelectFilter::make('severity')
-                    ->label('Status DASS-21')
-                    ->options(Recommendation::SEVERITY_LABELS),
-            ])
+            ->filters($filters)
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
