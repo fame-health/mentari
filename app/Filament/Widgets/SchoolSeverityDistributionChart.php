@@ -10,6 +10,8 @@ class SchoolSeverityDistributionChart extends ChartWidget
 {
     public ?int $schoolId = null;
 
+    public ?int $classroomId = null;
+
     protected ?string $heading = 'Distribusi Tingkat Keparahan DASS-21';
 
     protected ?string $description = 'Jumlah hasil screening pada setiap kategori (Normal, Ringan, Sedang, Berat, Sangat Berat) untuk Depresi, Kecemasan, dan Stres.';
@@ -24,7 +26,7 @@ class SchoolSeverityDistributionChart extends ChartWidget
 
     protected function getData(): array
     {
-        $distribution = app(SchoolScreeningReportData::class)->severityDistribution($this->schoolId);
+        $distribution = app(SchoolScreeningReportData::class)->severityDistribution($this->schoolId, $this->classroomId);
 
         return [
             'datasets' => [

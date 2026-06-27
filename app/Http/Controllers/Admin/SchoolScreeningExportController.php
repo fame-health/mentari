@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Classroom;
 use App\Models\School;
 use App\Services\SchoolScreeningExcelExporter;
 use App\Services\SchoolScreeningPdfExporter;
@@ -19,9 +20,10 @@ class SchoolScreeningExportController extends Controller
         SchoolScreeningPdfExporter $exporter,
     ): Response {
         $this->authorizeAdmin($request);
-        $filename = $this->filename($school, 'pdf');
+        $classroom = $this->resolveClassroom($request, $school);
+        $filename = $this->filename($school, 'pdf', $classroom);
 
-        return response($exporter->make($school), 200, [
+        return response($exporter->make($school, $classroom?->id), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
             'Cache-Control' => 'private, no-store, max-age=0',
@@ -36,10 +38,11 @@ class SchoolScreeningExportController extends Controller
         SchoolScreeningExcelExporter $exporter,
     ): BinaryFileResponse {
         $this->authorizeAdmin($request);
-        $path = $exporter->make($school);
+        $classroom = $this->resolveClassroom($request, $school);
+        $path = $exporter->make($school, $classroom?->id);
 
         return response()
-            ->download($path, $this->filename($school, 'xlsx'), [
+            ->download($path, $this->filename($school, 'xlsx', $classroom), [
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 'Cache-Control' => 'private, no-store, max-age=0',
                 'Pragma' => 'no-cache',
@@ -53,10 +56,30 @@ class SchoolScreeningExportController extends Controller
         abort_unless($request->user()?->role === 'admin', 403);
     }
 
-    private function filename(School $school, string $extension): string
+    private function resolveClassroom(Request $request, School $school): ?Classroom
+    {
+        $classroomKey = $request->query('class');
+
+        if (blank($classroomKey) || $classroomKey === 'all') {
+            return null;
+        }
+
+        abort_unless(ctype_digit((string) $classroomKey), 404);
+
+        $classroom = $school->classrooms()
+            ->whereKey((int) $classroomKey)
+            ->first();
+
+        abort_unless($classroom, 404);
+
+        return $classroom;
+    }
+
+    private function filename(School $school, string $extension, ?Classroom $classroom = null): string
     {
         $schoolName = Str::slug($school->name) ?: 'sekolah';
+        $classroomName = $classroom ? '-kelas-'.Str::slug($classroom->name) : '-semua-kelas';
 
-        return "hasil-screening-{$schoolName}-".now()->format('Y-m-d').".{$extension}";
+        return "hasil-screening-{$schoolName}{$classroomName}-".now()->format('Y-m-d').".{$extension}";
     }
 }

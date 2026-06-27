@@ -13,9 +13,9 @@ class SchoolScreeningPdfExporter
 
     public function __construct(private readonly SchoolScreeningReportData $reportData) {}
 
-    public function make(School $school): string
+    public function make(School $school, ?int $classroomId = null): string
     {
-        $report = $this->reportData->report($school);
+        $report = $this->reportData->report($school, $classroomId);
         $pdf = new SimplePdfDocument;
 
         $this->drawOverviewPage($pdf, $report);
@@ -29,6 +29,7 @@ class SchoolScreeningPdfExporter
         $pdf->addPage();
         $this->drawPageHeader($pdf, $report['school'], 'Laporan Hasil Screening Sekolah');
         $pdf->text(32, 60, 'Dibuat: '.$report['generated_at']->translatedFormat('d F Y, H:i').' WIB', 8.5, false, [100, 107, 118]);
+        $pdf->text(32, 72, 'Cakupan kelas: '.$this->classroomLabel($report), 8.5, false, [100, 107, 118]);
 
         $summary = $report['summary'];
         $cards = [
@@ -140,6 +141,7 @@ class SchoolScreeningPdfExporter
             $pdf->addPage();
             $this->drawPageHeader($pdf, $report['school'], 'Data Lengkap Hasil Screening');
             $pdf->text(32, 60, 'Urutan: hasil terbaru terlebih dahulu', 8.5, false, [100, 107, 118]);
+            $pdf->text(32, 72, 'Cakupan kelas: '.$this->classroomLabel($report), 8.5, false, [100, 107, 118]);
             $currentTop = 78;
             $this->drawTableRow($pdf, $currentTop, $columnWidths, $headers, 24, true);
             $currentTop += 24;
@@ -236,6 +238,11 @@ class SchoolScreeningPdfExporter
         $pdf->text(32, 35, 'MENTARI', 15, true, [236, 72, 153]);
         $pdf->text(115, 35, $title, 15, true, [31, 41, 55]);
         $pdf->text(32, 53, $school->name.' ('.($school->code ?: 'tanpa kode').')', 9, false, [75, 85, 99]);
+    }
+
+    private function classroomLabel(array $report): string
+    {
+        return $report['classroom'] ? 'Kelas '.$report['classroom']->name : 'Semua kelas';
     }
 
     private function drawFooter(SimplePdfDocument $pdf): void

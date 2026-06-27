@@ -6,18 +6,25 @@ use App\Filament\Resources\ScreeningResults\ScreeningResultResource;
 use App\Filament\Widgets\SchoolScreeningStats;
 use App\Filament\Widgets\SchoolScreeningTrendChart;
 use App\Filament\Widgets\SchoolSeverityDistributionChart;
+use App\Models\Classroom;
 use App\Models\School;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Url;
 
 class ListSchoolScreeningResults extends ListRecords
 {
     protected static string $resource = ScreeningResultResource::class;
 
+    private const ALL_CLASSROOMS = 'all';
+
     public School $school;
+
+    #[Url(as: 'class')]
+    public ?string $selectedClassroomKey = null;
 
     protected Width|string|null $maxContentWidth = Width::Full;
 
@@ -27,6 +34,10 @@ class ListSchoolScreeningResults extends ListRecords
         $this->school = $routeSchool instanceof School
             ? $routeSchool
             : School::query()->findOrFail($routeSchool);
+
+        if ($this->selectedClassroomKey && $this->selectedClassroomKey !== self::ALL_CLASSROOMS) {
+            abort_unless($this->selectedClassroomId() !== null, 404);
+        }
 
         parent::mount();
     }
@@ -38,7 +49,7 @@ class ListSchoolScreeningResults extends ListRecords
 
     public function getSubheading(): string|Htmlable|null
     {
-        return 'Data dan diagram hanya mencakup siswa yang terdaftar di sekolah ini.';
+        return 'Data dan diagram mencakup '.$this->selectedClassroomLabel().' di sekolah ini.';
     }
 
     public function getBreadcrumb(): ?string
@@ -49,9 +60,10 @@ class ListSchoolScreeningResults extends ListRecords
     protected function getTableQuery(): Builder
     {
         return parent::getTableQuery()
-            ->with('user:id,name,level,school_id')
+            ->with('user:id,name,level,school_id,classroom_id')
             ->whereHas('user', fn (Builder $query): Builder => $query
                 ->where('school_id', $this->school->id)
+                ->when($this->selectedClassroomId(), fn (Builder $query, int $classroomId): Builder => $query->where('classroom_id', $classroomId))
                 ->where('role', 'student'));
     }
 
@@ -62,12 +74,12 @@ class ListSchoolScreeningResults extends ListRecords
                 ->label('Export PDF')
                 ->icon('heroicon-o-document-arrow-down')
                 ->color('danger')
-                ->url(route('admin.screening-results.school.export.pdf', $this->school)),
+                ->url(route('admin.screening-results.school.export.pdf', $this->exportRouteParameters())),
             Action::make('exportExcel')
                 ->label('Export Excel')
                 ->icon('heroicon-o-table-cells')
                 ->color('success')
-                ->url(route('admin.screening-results.school.export.excel', $this->school)),
+                ->url(route('admin.screening-results.school.export.excel', $this->exportRouteParameters())),
             Action::make('changeSchool')
                 ->label('Ganti sekolah')
                 ->icon('heroicon-o-arrow-left')
@@ -106,6 +118,54 @@ class ListSchoolScreeningResults extends ListRecords
     {
         return [
             'schoolId' => $this->school->id,
+            'classroomId' => $this->selectedClassroomId(),
         ];
+    }
+
+    private function selectedClassroomId(): ?int
+    {
+        if (blank($this->selectedClassroomKey) || $this->selectedClassroomKey === self::ALL_CLASSROOMS) {
+            return null;
+        }
+
+        if (! ctype_digit((string) $this->selectedClassroomKey)) {
+            return null;
+        }
+
+        $classroomId = (int) $this->selectedClassroomKey;
+
+        return Classroom::query()
+            ->where('school_id', $this->school->id)
+            ->whereKey($classroomId)
+            ->exists()
+            ? $classroomId
+            : null;
+    }
+
+    private function selectedClassroomLabel(): string
+    {
+        $classroomId = $this->selectedClassroomId();
+
+        if (! $classroomId) {
+            return 'semua kelas';
+        }
+
+        $classroomName = Classroom::query()
+            ->where('school_id', $this->school->id)
+            ->whereKey($classroomId)
+            ->value('name');
+
+        return $classroomName ? 'kelas '.$classroomName : 'kelas terpilih';
+    }
+
+    private function exportRouteParameters(): array
+    {
+        $parameters = ['school' => $this->school];
+
+        if (filled($this->selectedClassroomKey)) {
+            $parameters['class'] = $this->selectedClassroomKey;
+        }
+
+        return $parameters;
     }
 }

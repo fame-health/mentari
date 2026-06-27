@@ -31,6 +31,7 @@ class MentariStatsOverview extends StatsOverviewWidget
         $studentCount = User::where('role', 'student')->count();
         $todayMoodCount = MoodEntry::whereDate('entry_date', today())->count();
         $yesterdayMoodCount = MoodEntry::whereDate('entry_date', today()->subDay())->count();
+        $todayMoodAverage = $this->getMoodAverageForDate(today());
         $monthlyScreenings = ScreeningResult::whereBetween('taken_at', [now()->startOfMonth(), now()->endOfMonth()])->count();
         $activeAlerts = RiskAlert::whereNull('dismissed_at')->count();
         $urgentAlerts = RiskAlert::whereNull('dismissed_at')->where('level', 'urgent')->count();
@@ -44,9 +45,9 @@ class MentariStatsOverview extends StatsOverviewWidget
                 ->chart($this->getDailyCounts(User::where('role', 'student'), 'created_at', 7))
                 ->chartColor('primary')
                 ->color('primary'),
-            Stat::make('Mood hari ini', Number::format($todayMoodCount))
+            Stat::make('Check-in mood hari ini', Number::format($todayMoodCount))
                 ->extraAttributes(['class' => 'mentari-stat mentari-stat--mood'])
-                ->description($this->formatDelta($todayMoodCount, $yesterdayMoodCount, 'dari kemarin'))
+                ->description($this->formatMoodCheckInDescription($todayMoodCount, $yesterdayMoodCount, $todayMoodAverage))
                 ->icon('heroicon-o-face-smile')
                 ->descriptionIcon($todayMoodCount >= $yesterdayMoodCount ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->descriptionColor($todayMoodCount >= $yesterdayMoodCount ? 'success' : 'warning')
@@ -82,6 +83,25 @@ class MentariStatsOverview extends StatsOverviewWidget
         }
 
         return ($delta > 0 ? '+' : '').$delta.' '.$label;
+    }
+
+    private function formatMoodCheckInDescription(int $current, int $previous, ?float $average): string
+    {
+        if ($current === 0) {
+            return 'Belum ada check-in hari ini';
+        }
+
+        return 'Rata-rata '.$average.'/5, '.$this->formatDelta($current, $previous, 'check-in dari kemarin');
+    }
+
+    private function getMoodAverageForDate($date): ?float
+    {
+        $average = MoodEntry::query()
+            ->join('mood_options', 'mood_entries.mood_option_id', '=', 'mood_options.id')
+            ->whereDate('entry_date', $date)
+            ->avg('mood_options.score');
+
+        return $average === null ? null : round((float) $average, 2);
     }
 
     private function getDailyCounts($query, string $column, int $days): array

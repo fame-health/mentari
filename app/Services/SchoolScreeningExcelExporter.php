@@ -16,9 +16,9 @@ class SchoolScreeningExcelExporter
 {
     public function __construct(private readonly SchoolScreeningReportData $reportData) {}
 
-    public function make(School $school): string
+    public function make(School $school, ?int $classroomId = null): string
     {
-        $report = $this->reportData->report($school);
+        $report = $this->reportData->report($school, $classroomId);
         $path = tempnam(sys_get_temp_dir(), 'mentari-screening-');
         $options = new Options;
         $options->mergeCells(0, 1, 3, 1, 0);
@@ -52,6 +52,7 @@ class SchoolScreeningExcelExporter
         $writer->addRow(Row::fromValues(['LAPORAN HASIL SCREENING SEKOLAH', null, null, null], $titleStyle)->setHeight(28));
         $writer->addRow(Row::fromValues(['Sekolah', $report['school']->name, null, null], $bodyStyle));
         $writer->addRow(Row::fromValues(['Kode sekolah', $report['school']->code ?: '-', null, null], $bodyStyle));
+        $writer->addRow(Row::fromValues(['Kelas', $this->classroomLabel($report), null, null], $bodyStyle));
         $writer->addRow(Row::fromValues(['Dibuat', $report['generated_at']->format('Y-m-d H:i'), null, null], $bodyStyle));
         $writer->addRow(Row::fromValues([]));
 
@@ -112,7 +113,7 @@ class SchoolScreeningExcelExporter
     {
         $sheet = $writer->addNewSheetAndMakeItCurrent();
         $sheet->setName('Data Screening');
-        $sheet->setSheetView((new SheetView)->setShowGridLines(false)->setFreezeRow(6));
+        $sheet->setSheetView((new SheetView)->setShowGridLines(false)->setFreezeRow(7));
         $sheet->setColumnWidth(7, 1);
         $sheet->setColumnWidth(24, 2);
         $sheet->setColumnWidth(28, 3);
@@ -132,6 +133,7 @@ class SchoolScreeningExcelExporter
 
         $writer->addRow(Row::fromValues(['DATA LENGKAP HASIL SCREENING - '.$report['school']->name], $titleStyle)->setHeight(28));
         $writer->addRow(Row::fromValues(['Kode sekolah', $report['school']->code ?: '-'], $bodyStyle));
+        $writer->addRow(Row::fromValues(['Kelas', $this->classroomLabel($report)], $bodyStyle));
         $writer->addRow(Row::fromValues(['Dibuat', $report['generated_at']->format('Y-m-d H:i')], $bodyStyle));
         $writer->addRow(Row::fromValues(['Jumlah data', $report['results']->count()], $bodyStyle));
         $writer->addRow(Row::fromValues([]));
@@ -185,9 +187,14 @@ class SchoolScreeningExcelExporter
             ])->setHeight(22));
         }
 
-        $lastRow = max(6, 6 + $report['results']->count());
-        $sheet->setAutoFilter(new AutoFilter(0, 6, 12, $lastRow));
-        $sheet->setPrintTitleRows('1:6');
+        $lastRow = max(7, 7 + $report['results']->count());
+        $sheet->setAutoFilter(new AutoFilter(0, 7, 12, $lastRow));
+        $sheet->setPrintTitleRows('1:7');
+    }
+
+    private function classroomLabel(array $report): string
+    {
+        return $report['classroom'] ? 'Kelas '.$report['classroom']->name : 'Semua kelas';
     }
 
     private function style(

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Classroom;
 use App\Models\School;
 use App\Models\ScreeningResult;
 use App\Models\User;
@@ -18,9 +19,18 @@ class AdminScreeningResultsBySchoolTest extends TestCase
         $admin = User::factory()->create(['role' => 'admin']);
         $firstSchool = School::create(['name' => 'SMA Mentari Satu', 'code' => 'SMS-01']);
         $secondSchool = School::create(['name' => 'SMA Mentari Dua', 'code' => 'SMS-02']);
+        $firstClassroom = Classroom::create(['school_id' => $firstSchool->id, 'name' => 'XI IPA 1']);
+        $secondClassroom = Classroom::create(['school_id' => $firstSchool->id, 'name' => 'XI IPA 2']);
         $firstStudent = User::factory()->create([
             'school_id' => $firstSchool->id,
+            'classroom_id' => $firstClassroom->id,
             'name' => 'Siswa Sekolah Pertama',
+            'role' => 'student',
+        ]);
+        $classmate = User::factory()->create([
+            'school_id' => $firstSchool->id,
+            'classroom_id' => $secondClassroom->id,
+            'name' => 'Siswa Kelas Lain',
             'role' => 'student',
         ]);
         $secondStudent = User::factory()->create([
@@ -30,37 +40,81 @@ class AdminScreeningResultsBySchoolTest extends TestCase
         ]);
 
         $this->createScreeningResult($firstStudent);
+        $this->createScreeningResult($classmate);
         $this->createScreeningResult($secondStudent);
 
         $this->actingAs($admin)
             ->get('/admin/screening-results')
             ->assertOk()
-            ->assertSee('Pilih sekolah terlebih dahulu')
+            ->assertSee('Pilih Sekolah')
             ->assertSee('SMA Mentari Satu')
             ->assertSee('SMA Mentari Dua');
+
+        $this->actingAs($admin)
+            ->get("/admin/screening-results?school={$firstSchool->id}")
+            ->assertOk()
+            ->assertSee('Pilih Kelas')
+            ->assertSee('Semua kelas')
+            ->assertSee('Kelas XI IPA 1')
+            ->assertSee('Kelas XI IPA 2');
+
+        $this->actingAs($admin)
+            ->get("/admin/screening-results?school={$firstSchool->id}&class=all")
+            ->assertOk()
+            ->assertSee('Data Screening')
+            ->assertSee('Siswa Sekolah Pertama')
+            ->assertSee('Siswa Kelas Lain')
+            ->assertDontSee('Siswa Sekolah Kedua');
+
+        $this->actingAs($admin)
+            ->get("/admin/screening-results?school={$firstSchool->id}&class={$firstClassroom->id}")
+            ->assertOk()
+            ->assertSee('Data Screening')
+            ->assertSee('Siswa Sekolah Pertama')
+            ->assertDontSee('Siswa Kelas Lain')
+            ->assertDontSee('Siswa Sekolah Kedua');
 
         $this->actingAs($admin)
             ->get("/admin/screening-results/school/{$firstSchool->id}")
             ->assertOk()
             ->assertSee('Hasil Screening')
             ->assertSee('Siswa Sekolah Pertama')
+            ->assertSee('Siswa Kelas Lain')
             ->assertDontSee('Siswa Sekolah Kedua')
             ->assertSee('Export PDF')
             ->assertSee('Export Excel');
+
+        $this->actingAs($admin)
+            ->get("/admin/screening-results/school/{$firstSchool->id}?class={$firstClassroom->id}")
+            ->assertOk()
+            ->assertSee('Hasil Screening')
+            ->assertSee('Siswa Sekolah Pertama')
+            ->assertDontSee('Siswa Kelas Lain')
+            ->assertDontSee('Siswa Sekolah Kedua');
     }
 
     public function test_admin_can_export_school_screening_results_to_pdf_and_excel(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
         $school = School::create(['name' => 'SMA Mentari Export', 'code' => 'SME-01']);
+        $classroom = Classroom::create(['school_id' => $school->id, 'name' => 'XI']);
+        $otherClassroom = Classroom::create(['school_id' => $school->id, 'name' => 'XII']);
         $student = User::factory()->create([
             'school_id' => $school->id,
+            'classroom_id' => $classroom->id,
             'name' => 'Siswa Data Export',
             'email' => 'siswa.export@mentari.test',
             'role' => 'student',
-            'level' => 'XI',
+        ]);
+        $otherStudent = User::factory()->create([
+            'school_id' => $school->id,
+            'classroom_id' => $otherClassroom->id,
+            'name' => 'Siswa Data Kelas Lain',
+            'email' => 'siswa.lain@mentari.test',
+            'role' => 'student',
         ]);
         $result = $this->createScreeningResult($student);
+        $this->createScreeningResult($otherStudent);
 
         $pdfResponse = $this->actingAs($admin)
             ->get(route('admin.screening-results.school.export.pdf', $school));
@@ -94,6 +148,15 @@ class AdminScreeningResultsBySchoolTest extends TestCase
         $this->assertStringContainsString((string) $result->id, $dataSheetXml);
         $zip->close();
         @unlink($path);
+
+        $filteredPdfResponse = $this->actingAs($admin)
+            ->get(route('admin.screening-results.school.export.pdf', ['school' => $school, 'class' => $classroom->id]));
+
+        $filteredPdfResponse
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+        $this->assertStringContainsString('Siswa Data Export', $filteredPdfResponse->getContent());
+        $this->assertStringNotContainsString('Siswa Data Kelas Lain', $filteredPdfResponse->getContent());
     }
 
     public function test_student_cannot_export_school_screening_results(): void

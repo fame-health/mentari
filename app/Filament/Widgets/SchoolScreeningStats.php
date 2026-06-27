@@ -11,6 +11,8 @@ class SchoolScreeningStats extends StatsOverviewWidget
 {
     public ?int $schoolId = null;
 
+    public ?int $classroomId = null;
+
     protected int|string|array $columnSpan = [
         'default' => 'full',
     ];
@@ -26,7 +28,7 @@ class SchoolScreeningStats extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        $summary = app(SchoolScreeningReportData::class)->summary($this->schoolId);
+        $summary = app(SchoolScreeningReportData::class)->summary($this->schoolId, $this->classroomId);
 
         return [
             Stat::make('Total Siswa Terdaftar', Number::format($summary['student_count']))

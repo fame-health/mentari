@@ -6,14 +6,16 @@ use App\Models\MoodEntry;
 use Carbon\CarbonPeriod;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class MoodTrendChart extends ChartWidget
 {
     protected static ?int $sort = 2;
 
-    protected ?string $heading = 'Tren Mood 14 Hari';
+    protected ?string $heading = 'Rata-rata Mood Harian';
 
-    protected ?string $description = 'Rata-rata skor mood siswa dari check-in harian.';
+    private ?Collection $trendRows = null;
 
     protected ?string $pollingInterval = '10s';
 
@@ -28,12 +30,7 @@ class MoodTrendChart extends ChartWidget
     protected function getData(): array
     {
         $start = today()->subDays(13);
-        $averages = MoodEntry::query()
-            ->join('mood_options', 'mood_entries.mood_option_id', '=', 'mood_options.id')
-            ->whereDate('entry_date', '>=', $start)
-            ->selectRaw('entry_date, AVG(mood_options.score) as average_score')
-            ->groupBy('entry_date')
-            ->pluck('average_score', 'entry_date');
+        $trendRows = $this->getTrendRows();
 
         $period = collect(CarbonPeriod::create($start, today()));
 
@@ -42,8 +39,8 @@ class MoodTrendChart extends ChartWidget
                 [
                     'label' => 'Rata-rata skor mood',
                     'data' => $period
-                        ->map(fn ($date): ?float => isset($averages[$date->toDateString()])
-                            ? round((float) $averages[$date->toDateString()], 2)
+                        ->map(fn ($date): ?float => $trendRows->has($date->toDateString())
+                            ? round((float) $trendRows->get($date->toDateString())->average_score, 2)
                             : null)
                         ->all(),
                     'borderColor' => '#f97316',
@@ -52,6 +49,7 @@ class MoodTrendChart extends ChartWidget
                     'pointBorderColor' => '#fff7ed',
                     'pointRadius' => 3,
                     'pointHoverRadius' => 5,
+                    'spanGaps' => true,
                     'fill' => true,
                     'tension' => 0.42,
                 ],
@@ -63,6 +61,32 @@ class MoodTrendChart extends ChartWidget
     protected function getType(): string
     {
         return 'line';
+    }
+
+    public function getDescription(): string
+    {
+        $trendRows = $this->getTrendRows();
+        $totalCheckIns = (int) $trendRows->sum('total');
+
+        if ($totalCheckIns === 0) {
+            return 'Belum ada check-in mood dalam 14 hari terakhir. Grafik akan terisi setelah siswa mengirim mood harian.';
+        }
+
+        $todayKey = today()->toDateString();
+        $yesterdayKey = today()->subDay()->toDateString();
+        $todayRow = $trendRows->get($todayKey);
+        $yesterdayRow = $trendRows->get($yesterdayKey);
+        $latestRow = $trendRows->last();
+        $latestDate = $latestRow?->aggregate_date
+            ? Carbon::parse($latestRow->aggregate_date)->format('d M')
+            : '-';
+        $todayAverage = $todayRow ? number_format((float) $todayRow->average_score, 2) : '-';
+        $comparison = $this->formatAverageComparison(
+            $todayRow ? (float) $todayRow->average_score : null,
+            $yesterdayRow ? (float) $yesterdayRow->average_score : null,
+        );
+
+        return "{$totalCheckIns} check-in dalam 14 hari. Hari ini: {$todayAverage}/5. Data terbaru masuk pada {$latestDate}. {$comparison}";
     }
 
     protected function getOptions(): array|RawJs|null
@@ -84,7 +108,7 @@ class MoodTrendChart extends ChartWidget
                     ],
                 ],
                 'y' => [
-                    'beginAtZero' => true,
+                    'min' => 1,
                     'suggestedMax' => 5,
                     'ticks' => [
                         'precision' => 0,
@@ -92,5 +116,40 @@ class MoodTrendChart extends ChartWidget
                 ],
             ],
         ];
+    }
+
+    private function getTrendRows(): Collection
+    {
+        return $this->trendRows ??= MoodEntry::query()
+            ->join('mood_options', 'mood_entries.mood_option_id', '=', 'mood_options.id')
+            ->whereDate('entry_date', '>=', today()->subDays(13))
+            ->selectRaw('DATE(entry_date) as aggregate_date')
+            ->selectRaw('COUNT(*) as total')
+            ->selectRaw('AVG(mood_options.score) as average_score')
+            ->groupBy('aggregate_date')
+            ->orderBy('aggregate_date')
+            ->get()
+            ->keyBy(fn ($row): string => (string) $row->aggregate_date);
+    }
+
+    private function formatAverageComparison(?float $todayAverage, ?float $yesterdayAverage): string
+    {
+        if ($todayAverage === null) {
+            return 'Belum ada data hari ini.';
+        }
+
+        if ($yesterdayAverage === null) {
+            return 'Belum ada pembanding dari kemarin.';
+        }
+
+        $delta = round($todayAverage - $yesterdayAverage, 2);
+
+        if ($delta === 0.0) {
+            return 'Rata-rata stabil dari kemarin.';
+        }
+
+        return $delta > 0
+            ? 'Rata-rata naik '.number_format($delta, 2).' poin dari kemarin.'
+            : 'Rata-rata turun '.number_format(abs($delta), 2).' poin dari kemarin.';
     }
 }

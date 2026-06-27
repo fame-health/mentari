@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Widgets\MoodTrendChart;
 use App\Filament\Widgets\RiskLevelChart;
+use App\Models\MoodEntry;
+use App\Models\MoodOption;
 use App\Models\ScreeningResult;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,7 +23,7 @@ class AdminDashboardTest extends TestCase
         $this->actingAs($admin)
             ->get('/admin')
             ->assertOk()
-            ->assertSee('MENTARI Admin')
+            ->assertSee('Dashboard MENTARI')
             ->assertSeeInOrder([
                 'Data &amp; Pengaturan',
                 'Sekolah',
@@ -83,6 +86,58 @@ class AdminDashboardTest extends TestCase
         $this->assertSame([1, 1, 2], $data['datasets'][0]['data']);
     }
 
+    public function test_mood_trend_chart_explains_empty_and_average_data(): void
+    {
+        $emptyWidget = new MoodTrendChart;
+
+        $this->assertStringContainsString('Belum ada check-in mood', $emptyWidget->getDescription());
+
+        $student = User::factory()->create(['role' => 'student']);
+        $classmate = User::factory()->create(['role' => 'student']);
+        $sad = MoodOption::create([
+            'key' => 'sad',
+            'emoji' => ':(',
+            'label' => 'Sedih',
+            'color' => '#94a3b8',
+            'score' => 2,
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+        $happy = MoodOption::create([
+            'key' => 'happy',
+            'emoji' => ':)',
+            'label' => 'Baik',
+            'color' => '#22c55e',
+            'score' => 4,
+            'sort_order' => 2,
+            'is_active' => true,
+        ]);
+
+        MoodEntry::create([
+            'user_id' => $student->id,
+            'mood_option_id' => $sad->id,
+            'entry_date' => today(),
+            'energy' => 5,
+            'stress' => 5,
+        ]);
+        MoodEntry::create([
+            'user_id' => $classmate->id,
+            'mood_option_id' => $happy->id,
+            'entry_date' => today(),
+            'energy' => 8,
+            'stress' => 3,
+        ]);
+
+        $widget = new MoodTrendChart;
+        $method = new ReflectionMethod(MoodTrendChart::class, 'getData');
+        $data = $method->invoke($widget);
+
+        $this->assertSame(14, count($data['labels']));
+        $this->assertSame(3.0, $data['datasets'][0]['data'][13]);
+        $this->assertStringContainsString('2 check-in dalam 14 hari', $widget->getDescription());
+        $this->assertStringContainsString('Hari ini: 3.00/5', $widget->getDescription());
+    }
+
     public function test_admin_can_open_all_resource_indexes(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
@@ -96,7 +151,6 @@ class AdminDashboardTest extends TestCase
             '/admin/recommendations',
             '/admin/screening-questions',
             '/admin/screening-results',
-            '/admin/screening-answers',
             '/admin/community-posts',
             '/admin/risk-alerts',
         ];

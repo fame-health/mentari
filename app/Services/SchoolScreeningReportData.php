@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Classroom;
 use App\Models\RiskAlert;
 use App\Models\School;
 use App\Models\ScreeningResult;
@@ -20,25 +21,33 @@ class SchoolScreeningReportData
         'extremely_severe' => 'Sangat Berat',
     ];
 
-    public function report(School $school): array
+    public function report(School $school, ?int $classroomId = null): array
     {
+        $classroom = $classroomId
+            ? Classroom::query()
+                ->where('school_id', $school->id)
+                ->find($classroomId)
+            : null;
+
         return [
             'school' => $school,
+            'classroom' => $classroom,
             'generated_at' => now(),
-            'summary' => $this->summary($school->id),
-            'distribution' => $this->severityDistribution($school->id),
-            'trend' => $this->trend($school->id),
-            'results' => $this->results($school->id),
+            'summary' => $this->summary($school->id, $classroom?->id),
+            'distribution' => $this->severityDistribution($school->id, $classroom?->id),
+            'trend' => $this->trend($school->id, $classroom?->id),
+            'results' => $this->results($school->id, $classroom?->id),
         ];
     }
 
-    public function summary(?int $schoolId): array
+    public function summary(?int $schoolId, ?int $classroomId = null): array
     {
         $studentCount = User::query()
             ->where('school_id', $schoolId)
+            ->when($classroomId, fn (Builder $query): Builder => $query->where('classroom_id', $classroomId))
             ->where('role', 'student')
             ->count();
-        $screeningQuery = $this->screeningQuery($schoolId);
+        $screeningQuery = $this->screeningQuery($schoolId, $classroomId);
         $screeningCount = (clone $screeningQuery)->count();
         $screenedStudents = (clone $screeningQuery)->distinct()->count('user_id');
         $monthlyScreenings = (clone $screeningQuery)
@@ -47,6 +56,7 @@ class SchoolScreeningReportData
         $alertQuery = RiskAlert::query()
             ->whereHas('user', fn (Builder $query): Builder => $query
                 ->where('school_id', $schoolId)
+                ->when($classroomId, fn (Builder $query): Builder => $query->where('classroom_id', $classroomId))
                 ->where('role', 'student'))
             ->whereNull('dismissed_at');
         $activeAlerts = (clone $alertQuery)->count();
@@ -63,7 +73,7 @@ class SchoolScreeningReportData
         ];
     }
 
-    public function severityDistribution(?int $schoolId): array
+    public function severityDistribution(?int $schoolId, ?int $classroomId = null): array
     {
         $columns = [
             'depression' => 'depression_severity',
@@ -73,7 +83,7 @@ class SchoolScreeningReportData
         $counts = [];
 
         foreach ($columns as $key => $column) {
-            $counts[$key] = $this->screeningQuery($schoolId)
+            $counts[$key] = $this->screeningQuery($schoolId, $classroomId)
                 ->select($column)
                 ->selectRaw('COUNT(*) as aggregate_count')
                 ->groupBy($column)
@@ -91,14 +101,14 @@ class SchoolScreeningReportData
         ];
     }
 
-    public function trend(?int $schoolId): array
+    public function trend(?int $schoolId, ?int $classroomId = null): array
     {
         $start = now()->startOfMonth()->subMonths(5);
         $monthExpression = DB::connection()->getDriverName() === 'sqlite'
             ? "strftime('%Y-%m', taken_at)"
             : "DATE_FORMAT(taken_at, '%Y-%m')";
 
-        $averages = $this->screeningQuery($schoolId)
+        $averages = $this->screeningQuery($schoolId, $classroomId)
             ->where('taken_at', '>=', $start)
             ->selectRaw("{$monthExpression} as month_key")
             ->selectRaw('AVG(depression_score) as depression_average')
@@ -117,10 +127,10 @@ class SchoolScreeningReportData
         ];
     }
 
-    public function results(?int $schoolId): Collection
+    public function results(?int $schoolId, ?int $classroomId = null): Collection
     {
-        return $this->screeningQuery($schoolId)
-            ->with('user:id,name,email,level,school_id')
+        return $this->screeningQuery($schoolId, $classroomId)
+            ->with('user:id,name,email,level,school_id,classroom_id')
             ->latest('taken_at')
             ->get();
     }
@@ -130,11 +140,12 @@ class SchoolScreeningReportData
         return self::SEVERITIES[$severity] ?? ($severity ?: '-');
     }
 
-    private function screeningQuery(?int $schoolId): Builder
+    private function screeningQuery(?int $schoolId, ?int $classroomId = null): Builder
     {
         return ScreeningResult::query()
             ->whereHas('user', fn (Builder $query): Builder => $query
                 ->where('school_id', $schoolId)
+                ->when($classroomId, fn (Builder $query): Builder => $query->where('classroom_id', $classroomId))
                 ->where('role', 'student'));
     }
 

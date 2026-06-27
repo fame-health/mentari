@@ -10,6 +10,8 @@ class SchoolScreeningTrendChart extends ChartWidget
 {
     public ?int $schoolId = null;
 
+    public ?int $classroomId = null;
+
     protected ?string $heading = 'Tren Rata-rata Skor DASS-21 (6 Bulan Terakhir)';
 
     protected ?string $description = 'Grafik ini menampilkan perubahan rata-rata skor Depresi, Kecemasan, dan Stres setiap bulan. Skor yang meningkat mengindikasikan kondisi yang perlu perhatian lebih.';
@@ -24,7 +26,7 @@ class SchoolScreeningTrendChart extends ChartWidget
 
     protected function getData(): array
     {
-        $trend = app(SchoolScreeningReportData::class)->trend($this->schoolId);
+        $trend = app(SchoolScreeningReportData::class)->trend($this->schoolId, $this->classroomId);
 
         return [
             'datasets' => [
