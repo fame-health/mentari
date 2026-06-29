@@ -18,13 +18,13 @@ class ScreeningQuestionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQuestionMarkCircle;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Data & Pengaturan';
+    protected static string|\UnitEnum|null $navigationGroup = 'T (Tes Screening DASS-21)';
 
     protected static ?string $modelLabel = 'Pertanyaan Screening';
 
     protected static ?string $pluralModelLabel = 'Pertanyaan Screening';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
     {

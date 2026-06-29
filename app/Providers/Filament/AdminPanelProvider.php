@@ -41,10 +41,13 @@ class AdminPanelProvider extends PanelProvider
                 'warning' => Color::Amber,
             ])
             ->navigationGroups([
-                NavigationGroup::make('Data & Pengaturan'),
-                NavigationGroup::make('Monitoring Siswa'),
-                NavigationGroup::make('Konten & Dukungan'),
-                NavigationGroup::make('Komunitas'),
+                $this->mentariNavigationGroup('M (Mood Tracking Harian)', 'M', 'mood'),
+                $this->mentariNavigationGroup('E (Edukasi Kesehatan Mental)', 'E', 'education'),
+                $this->mentariNavigationGroup('N (Notifikasi Risiko Dini)', 'N', 'risk'),
+                $this->mentariNavigationGroup('T (Tes Screening DASS-21)', 'T', 'screening'),
+                $this->mentariNavigationGroup('A (Analisis Data/Digital Dashboard)', 'A', 'analytics'),
+                $this->mentariNavigationGroup('R (Rekomendasi Personalisasi)', 'R', 'recommendation'),
+                $this->mentariNavigationGroup('I (Integrasi Komunitas Sekolah)', 'I', 'community'),
             ])
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
@@ -71,6 +74,15 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+            ]);
+    }
+
+    private function mentariNavigationGroup(string $label, string $step, string $tone): NavigationGroup
+    {
+        return NavigationGroup::make($label)
+            ->extraSidebarAttributes([
+                'class' => "mentari-nav-group mentari-nav-group--{$tone}",
+                'data-mentari-step' => $step,
             ]);
     }
 }

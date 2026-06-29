@@ -24,7 +24,7 @@ class CommunityPostLikeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedHandThumbUp;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Komunitas';
+    protected static string|\UnitEnum|null $navigationGroup = 'I (Integrasi Komunitas Sekolah)';
 
     protected static ?string $modelLabel = 'Like Postingan';
 

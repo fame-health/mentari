@@ -22,7 +22,7 @@ class MoodEntryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFaceSmile;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Monitoring Siswa';
+    protected static string|\UnitEnum|null $navigationGroup = 'M (Mood Tracking Harian)';
 
     protected static ?string $modelLabel = 'Catatan Mood';
 

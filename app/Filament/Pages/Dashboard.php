@@ -15,6 +15,8 @@ class Dashboard extends BaseDashboard
 {
     protected static ?string $title = 'Dashboard MENTARI';
 
+    protected static ?int $navigationSort = -10;
+
     protected Width|string|null $maxContentWidth = Width::Full;
 
     public function getHeading(): string|Htmlable|null

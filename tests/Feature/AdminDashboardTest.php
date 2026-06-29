@@ -144,6 +144,7 @@ class AdminDashboardTest extends TestCase
         $urls = [
             '/admin/schools',
             '/admin/users',
+            '/admin/analysis-results',
             '/admin/mood-options',
             '/admin/mood-entries',
             '/admin/education-categories',

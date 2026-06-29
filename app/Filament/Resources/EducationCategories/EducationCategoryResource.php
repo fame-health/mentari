@@ -21,7 +21,7 @@ class EducationCategoryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolderOpen;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Konten & Dukungan';
+    protected static string|\UnitEnum|null $navigationGroup = 'E (Edukasi Kesehatan Mental)';
 
     protected static ?string $modelLabel = 'Kategori Edukasi';
 

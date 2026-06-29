@@ -22,7 +22,7 @@ class RecommendationResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLightBulb;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Konten & Dukungan';
+    protected static string|\UnitEnum|null $navigationGroup = 'R (Rekomendasi Personalisasi)';
 
     protected static ?string $modelLabel = 'Rekomendasi';
 
@@ -30,7 +30,7 @@ class RecommendationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
     {
