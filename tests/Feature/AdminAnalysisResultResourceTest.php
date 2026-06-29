@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
+use ZipArchive;
 
 class AdminAnalysisResultResourceTest extends TestCase
 {
@@ -134,6 +135,8 @@ class AdminAnalysisResultResourceTest extends TestCase
             ->assertSee('Grafik Per Sekolah')
             ->assertSee('Grafik Per Kelas')
             ->assertSee('Grafik Per Siswa')
+            ->assertSee('Export PDF')
+            ->assertSee('Export Excel')
             ->assertSee($classXStudent->name)
             ->assertSee($classXIStudent->name)
             ->assertDontSee($otherSchoolStudent->name);
@@ -145,6 +148,116 @@ class AdminAnalysisResultResourceTest extends TestCase
             ->assertSee($classXStudent->name)
             ->assertDontSee($classXIStudent->name)
             ->assertDontSee($otherSchoolStudent->name);
+    }
+
+    public function test_admin_can_export_analysis_results_to_pdf_and_excel_by_school_or_class(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $school = School::create(['name' => 'SMA Mentari Analisis Export', 'code' => 'SMA-EXP']);
+        $classX = Classroom::create(['school_id' => $school->id, 'name' => 'X', 'sort_order' => 1]);
+        $classXI = Classroom::create(['school_id' => $school->id, 'name' => 'XI', 'sort_order' => 2]);
+        $mood = MoodOption::create([
+            'key' => 'happy-export',
+            'emoji' => ':)',
+            'label' => 'Senang',
+            'color' => '#10b981',
+            'score' => 5,
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+        $student = User::factory()->create([
+            'school_id' => $school->id,
+            'classroom_id' => $classX->id,
+            'name' => 'Siswa Analisis Export',
+            'email' => 'analisis.export@mentari.test',
+            'role' => 'student',
+            'streak_days' => 14,
+            'last_activity_date' => today(),
+        ]);
+        $otherStudent = User::factory()->create([
+            'school_id' => $school->id,
+            'classroom_id' => $classXI->id,
+            'name' => 'Siswa Analisis Kelas Lain',
+            'email' => 'analisis.lain@mentari.test',
+            'role' => 'student',
+            'streak_days' => 3,
+            'last_activity_date' => today()->subDays(3),
+        ]);
+        $screeningResult = $this->createScreeningResult($student, 'moderate');
+        $this->createScreeningResult($otherStudent, 'mild');
+
+        MoodEntry::create([
+            'user_id' => $student->id,
+            'mood_option_id' => $mood->id,
+            'entry_date' => today(),
+            'energy' => 8,
+            'stress' => 2,
+        ]);
+        RiskAlert::create([
+            'user_id' => $student->id,
+            'screening_result_id' => $screeningResult->id,
+            'level' => 'attention',
+            'title' => 'Perlu pemantauan',
+            'message' => 'Siswa perlu dipantau.',
+            'recommendation' => 'Jadwalkan tindak lanjut.',
+        ]);
+
+        $schoolPdfResponse = $this->actingAs($admin)
+            ->get(route('admin.analysis-results.school.export.pdf', ['school' => $school, 'class' => 'all']));
+
+        $schoolPdfResponse
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF-1.4', $schoolPdfResponse->getContent());
+        $this->assertStringContainsString('Laporan Hasil Analisis Data', $schoolPdfResponse->getContent());
+        $this->assertStringContainsString('Siswa Analisis Export', $schoolPdfResponse->getContent());
+        $this->assertStringContainsString('Siswa Analisis Kelas Lain', $schoolPdfResponse->getContent());
+
+        $excelResponse = $this->actingAs($admin)
+            ->get(route('admin.analysis-results.school.export.excel', ['school' => $school, 'class' => 'all']));
+
+        $excelResponse
+            ->assertOk()
+            ->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $path = $excelResponse->baseResponse->getFile()->getPathname();
+        $this->assertFileExists($path);
+
+        $zip = new ZipArchive;
+        $this->assertTrue($zip->open($path) === true);
+        $workbookXml = $zip->getFromName('xl/workbook.xml');
+        $studentSheetXml = $zip->getFromName('xl/worksheets/sheet2.xml');
+        $this->assertIsString($workbookXml);
+        $this->assertIsString($studentSheetXml);
+        $this->assertStringContainsString('Ringkasan Analisis', $workbookXml);
+        $this->assertStringContainsString('Data Siswa', $workbookXml);
+        $this->assertStringContainsString('Data Kelas', $workbookXml);
+        $this->assertStringContainsString('Siswa Analisis Export', $studentSheetXml);
+        $this->assertStringContainsString((string) $student->id, $studentSheetXml);
+        $zip->close();
+        @unlink($path);
+
+        $classPdfResponse = $this->actingAs($admin)
+            ->get(route('admin.analysis-results.school.export.pdf', ['school' => $school, 'class' => $classX->id]));
+
+        $classPdfResponse
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+        $this->assertStringContainsString('Siswa Analisis Export', $classPdfResponse->getContent());
+        $this->assertStringNotContainsString('Siswa Analisis Kelas Lain', $classPdfResponse->getContent());
+    }
+
+    public function test_student_cannot_export_analysis_results(): void
+    {
+        $student = User::factory()->create(['role' => 'student']);
+        $school = School::create(['name' => 'SMA Analisis Rahasia', 'code' => 'SAR-01']);
+
+        $this->actingAs($student)
+            ->get(route('admin.analysis-results.school.export.pdf', $school))
+            ->assertForbidden();
+
+        $this->actingAs($student)
+            ->get(route('admin.analysis-results.school.export.excel', $school))
+            ->assertForbidden();
     }
 
     private function createScreeningResult(User $user, string $severity): ScreeningResult

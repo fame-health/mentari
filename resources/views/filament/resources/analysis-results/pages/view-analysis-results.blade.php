@@ -10,6 +10,9 @@
             $schoolOverview = $this->getSchoolOverview();
             $classroomCharts = $this->getClassroomCharts();
             $studentCharts = $this->getStudentCharts();
+            $studentsWithMood = $studentCharts->filter(fn (array $student): bool => $student['mood_count'] > 0)->count();
+            $studentsWithScreening = $studentCharts->filter(fn (array $student): bool => $student['screening_count'] > 0)->count();
+            $studentsWithActiveAlerts = $studentCharts->filter(fn (array $student): bool => $student['active_alerts'] > 0)->count();
             $streakChart = $studentCharts->sortByDesc('streak_days')->values();
             $severityDistribution = $this->getSeverityDistribution();
             $severityMax = max(1, $severityDistribution
@@ -862,63 +865,145 @@
             color: rgb(254 202 202);
         }
 
-        .analysis-student-board {
+        .analysis-student-workspace {
             display: grid;
-            gap: .65rem;
+            grid-template-columns: 1fr;
+            gap: .7rem;
+            align-items: start;
         }
 
-        .analysis-student-board-head,
-        .analysis-student-row {
+        .analysis-student-filter {
             display: grid;
-            grid-template-columns: minmax(12rem, 1.1fr) minmax(17rem, 2fr) minmax(9.5rem, .75fr);
-            gap: .8rem;
-            align-items: center;
+            grid-template-columns: minmax(6rem, .55fr) minmax(13rem, 1.35fr) minmax(8rem, .8fr) minmax(9rem, .95fr) minmax(13rem, 1.2fr);
+            gap: .55rem;
+            align-items: end;
+            border: 1px solid rgb(226 232 240 / .88);
+            border-radius: .5rem;
+            padding: .65rem;
+            background: rgb(255 255 255 / .82);
         }
 
-        .analysis-student-board-head {
-            padding: 0 .4rem;
-            color: rgb(100 116 139);
+        .dark .analysis-student-filter {
+            border-color: rgb(148 163 184 / .16);
+            background: rgb(15 23 42 / .68);
+        }
+
+        .analysis-filter-title {
+            color: rgb(15 23 42);
+            font-size: .84rem;
+            font-weight: 850;
+            line-height: 1.25;
+        }
+
+        .dark .analysis-filter-title {
+            color: rgb(248 250 252);
+        }
+
+        .analysis-filter-field {
+            display: grid;
+            min-width: 0;
+            gap: .22rem;
+        }
+
+        .analysis-filter-field label {
+            color: rgb(71 85 105);
             font-size: .68rem;
             font-weight: 850;
             text-transform: uppercase;
         }
 
-        .dark .analysis-student-board-head {
-            color: rgb(148 163 184);
+        .dark .analysis-filter-field label {
+            color: rgb(203 213 225);
         }
 
-        .analysis-student-list {
+        .analysis-filter-field input,
+        .analysis-filter-field select {
+            width: 100%;
+            min-height: 2.05rem;
+            border: 1px solid rgb(203 213 225 / .88);
+            border-radius: .5rem;
+            padding: .36rem .52rem;
+            background: white;
+            color: rgb(15 23 42);
+            font-size: .76rem;
+            outline: none;
+        }
+
+        .analysis-filter-field input:focus,
+        .analysis-filter-field select:focus {
+            border-color: rgb(var(--analysis-sky) / .76);
+            box-shadow: 0 0 0 3px rgb(var(--analysis-sky) / .12);
+        }
+
+        .dark .analysis-filter-field input,
+        .dark .analysis-filter-field select {
+            border-color: rgb(71 85 105 / .78);
+            background: rgb(15 23 42);
+            color: rgb(248 250 252);
+        }
+
+        .analysis-filter-stats {
             display: grid;
-            max-height: 42rem;
-            gap: .55rem;
-            overflow: auto;
-            padding-right: .15rem;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: .35rem;
         }
 
-        .analysis-student-row {
-            min-height: 7.9rem;
-            padding: .82rem;
-            background: rgb(255 255 255 / .88);
-            box-shadow: 0 8px 22px rgb(15 23 42 / .045);
+        .analysis-filter-stat {
+            border: 1px solid rgb(226 232 240 / .78);
+            border-radius: .5rem;
+            padding: .4rem .45rem;
+            background: rgb(248 250 252 / .72);
+        }
+
+        .dark .analysis-filter-stat {
+            border-color: rgb(148 163 184 / .14);
+            background: rgb(15 23 42 / .5);
+        }
+
+        .analysis-filter-stat strong,
+        .analysis-filter-stat span {
+            display: block;
+        }
+
+        .analysis-filter-stat strong {
+            color: rgb(15 23 42);
+            font-size: .82rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .dark .analysis-filter-stat strong {
+            color: rgb(248 250 252);
+        }
+
+        .analysis-filter-stat span {
+            margin-top: .18rem;
+            color: rgb(100 116 139);
+            font-size: .6rem;
+            font-weight: 800;
+        }
+
+        .dark .analysis-filter-stat span {
+            color: rgb(148 163 184);
         }
 
         .analysis-student-identity {
             display: flex;
             min-width: 0;
-            align-items: center;
-            gap: .7rem;
+            align-items: flex-start;
+            gap: .5rem;
         }
 
         .analysis-avatar {
             display: grid;
-            width: 2.65rem;
-            height: 2.65rem;
+            width: 2.2rem;
+            height: 2.2rem;
             flex: 0 0 auto;
             place-items: center;
             border-radius: .6rem;
             background: linear-gradient(135deg, rgb(var(--analysis-rose)), rgb(var(--analysis-sky)));
             color: white;
-            font-size: .82rem;
+            font-size: .74rem;
             font-weight: 900;
             box-shadow: 0 10px 18px rgb(var(--analysis-rose) / .18);
         }
@@ -927,6 +1012,7 @@
             display: block;
             overflow: hidden;
             color: rgb(15 23 42);
+            font-size: .8rem;
             font-weight: 850;
             line-height: 1.3;
             text-overflow: ellipsis;
@@ -940,8 +1026,8 @@
         .analysis-student-meta,
         .analysis-student-foot {
             color: rgb(100 116 139);
-            font-size: .74rem;
-            line-height: 1.4;
+            font-size: .66rem;
+            line-height: 1.32;
         }
 
         .analysis-student-meta {
@@ -952,6 +1038,10 @@
             white-space: nowrap;
         }
 
+        .analysis-student-foot {
+            display: block;
+        }
+
         .dark .analysis-student-meta,
         .dark .analysis-student-foot {
             color: rgb(148 163 184);
@@ -960,8 +1050,8 @@
         .analysis-student-metrics {
             display: flex;
             flex-wrap: wrap;
-            gap: .35rem;
-            margin-top: .5rem;
+            gap: .2rem;
+            margin-top: .28rem;
         }
 
         .analysis-student-metric strong {
@@ -974,15 +1064,205 @@
             color: rgb(248 250 252);
         }
 
+        .analysis-mini-bars {
+            grid-template-columns: 1fr;
+            gap: .24rem;
+        }
+
+        .analysis-mini-bars .analysis-bar-row {
+            min-width: 0;
+            border: 0;
+            border-radius: 0;
+            padding: 0;
+            background: transparent;
+        }
+
+        .dark .analysis-mini-bars .analysis-bar-row {
+            background: transparent;
+        }
+
+        .analysis-mini-bars .analysis-bar-top {
+            align-items: center;
+            flex-direction: row;
+            gap: .35rem;
+            font-size: .67rem;
+        }
+
+        .analysis-mini-bars .analysis-bar-value {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .analysis-mini-bars .analysis-bar-track {
+            height: .28rem;
+        }
+
+        .analysis-student-line {
+            display: grid;
+            min-width: 0;
+            align-self: stretch;
+            gap: .18rem;
+            border: 0;
+            border-radius: .5rem;
+            padding: 0;
+            background: transparent;
+        }
+
+        .dark .analysis-student-line {
+            background: transparent;
+        }
+
+        .analysis-line-head,
+        .analysis-line-legend {
+            display: flex;
+            min-width: 0;
+            align-items: center;
+            justify-content: space-between;
+            gap: .55rem;
+        }
+
+        .analysis-line-title {
+            overflow: hidden;
+            color: rgb(15 23 42);
+            font-size: .66rem;
+            font-weight: 850;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .dark .analysis-line-title {
+            color: rgb(248 250 252);
+        }
+
+        .analysis-line-caption {
+            flex: 0 0 auto;
+            color: rgb(100 116 139);
+            font-size: .6rem;
+            font-weight: 800;
+        }
+
+        .dark .analysis-line-caption {
+            color: rgb(148 163 184);
+        }
+
+        .analysis-line-svg {
+            display: block;
+            width: 100%;
+            height: 2.25rem;
+            overflow: visible;
+        }
+
+        .analysis-line-grid {
+            stroke: rgb(203 213 225 / .72);
+            stroke-width: 1;
+            vector-effect: non-scaling-stroke;
+        }
+
+        .dark .analysis-line-grid {
+            stroke: rgb(71 85 105 / .72);
+        }
+
+        .analysis-line-path {
+            fill: none;
+            stroke-width: 2.4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            vector-effect: non-scaling-stroke;
+        }
+
+        .analysis-line-path--mood {
+            stroke: #10b981;
+        }
+
+        .analysis-line-path--screening {
+            stroke: #0ea5e9;
+        }
+
+        .analysis-line-dot {
+            stroke: white;
+            stroke-width: 1.6;
+            vector-effect: non-scaling-stroke;
+        }
+
+        .dark .analysis-line-dot {
+            stroke: rgb(15 23 42);
+        }
+
+        .analysis-line-dot--mood,
+        .analysis-line-legend i[data-line="mood"] {
+            fill: #10b981;
+            background: #10b981;
+        }
+
+        .analysis-line-dot--screening,
+        .analysis-line-legend i[data-line="screening"] {
+            fill: #0ea5e9;
+            background: #0ea5e9;
+        }
+
+        .analysis-line-legend {
+            justify-content: flex-start;
+            color: rgb(100 116 139);
+            font-size: .58rem;
+            font-weight: 800;
+        }
+
+        .dark .analysis-line-legend {
+            color: rgb(148 163 184);
+        }
+
+        .analysis-line-legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: .28rem;
+        }
+
+        .analysis-line-legend i {
+            width: .48rem;
+            height: .48rem;
+            border-radius: 999px;
+        }
+
+        .analysis-line-empty {
+            display: grid;
+            min-height: 2.25rem;
+            place-items: center;
+            border: 1px dashed rgb(203 213 225);
+            border-radius: .45rem;
+            color: rgb(100 116 139);
+            font-size: .64rem;
+            font-weight: 800;
+        }
+
+        .dark .analysis-line-empty {
+            border-color: rgb(71 85 105);
+            color: rgb(148 163 184);
+        }
+
         .analysis-student-status {
             display: grid;
+            align-content: center;
             justify-items: start;
-            gap: .45rem;
+            gap: .3rem;
+        }
+
+        .analysis-status-grid {
+            display: grid;
+            width: 100%;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .24rem .5rem;
+        }
+
+        .analysis-status-grid span {
+            min-width: 0;
         }
 
         .analysis-table-wrap {
-            max-height: 36rem;
-            overflow: auto;
+            max-height: 42rem;
+            overflow-y: auto;
+            overflow-x: hidden;
             border: 1px solid rgb(226 232 240 / .88);
             border-radius: .5rem;
             background: rgb(255 255 255 / .82);
@@ -995,9 +1275,9 @@
 
         .analysis-table {
             width: 100%;
-            min-width: 58rem;
             border-collapse: collapse;
-            font-size: .82rem;
+            table-layout: fixed;
+            font-size: .72rem;
         }
 
         .analysis-table thead th {
@@ -1006,7 +1286,7 @@
             top: 0;
             background: rgb(248 250 252 / .98);
             color: rgb(71 85 105);
-            font-size: .7rem;
+            font-size: .62rem;
             font-weight: 850;
             text-align: left;
             text-transform: uppercase;
@@ -1020,8 +1300,9 @@
         .analysis-table th,
         .analysis-table td {
             border-bottom: 1px solid rgb(226 232 240 / .86);
-            padding: .72rem;
+            padding: .42rem .5rem;
             vertical-align: top;
+            overflow-wrap: anywhere;
         }
 
         .dark .analysis-table th,
@@ -1035,6 +1316,42 @@
 
         .dark .analysis-table tbody tr:hover {
             background: rgb(12 74 110 / .18);
+        }
+
+        .analysis-table tbody tr[style*="display: none"] + tr {
+            border-top: 0;
+        }
+
+        .analysis-table-sticky {
+            z-index: 2;
+            width: 24%;
+            background: rgb(255 255 255 / .98);
+        }
+
+        .analysis-table thead .analysis-table-sticky {
+            z-index: 3;
+            background: rgb(248 250 252 / .98);
+        }
+
+        .dark .analysis-table-sticky {
+            background: rgb(15 23 42 / .98);
+            box-shadow: 1px 0 0 rgb(148 163 184 / .14);
+        }
+
+        .dark .analysis-table thead .analysis-table-sticky {
+            background: rgb(15 23 42 / .98);
+        }
+
+        .analysis-table-summary {
+            width: 23%;
+        }
+
+        .analysis-table-chart {
+            width: 20%;
+        }
+
+        .analysis-table-status {
+            width: 33%;
         }
 
         .analysis-empty {
@@ -1057,21 +1374,25 @@
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
-            .analysis-student-board-head,
-            .analysis-student-row {
-                grid-template-columns: minmax(13rem, 1fr) minmax(16rem, 1.4fr);
+            .analysis-student-filter {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
-            .analysis-student-board-head span:last-child,
-            .analysis-student-status {
+            .analysis-filter-title,
+            .analysis-filter-stats {
                 grid-column: 1 / -1;
             }
         }
 
         @media (max-width: 960px) {
             .analysis-steps,
-            .analysis-dashboard-grid {
+            .analysis-dashboard-grid,
+            .analysis-student-workspace {
                 grid-template-columns: 1fr;
+            }
+
+            .analysis-student-filter {
+                position: static;
             }
 
             .analysis-command,
@@ -1088,13 +1409,21 @@
                 grid-template-columns: 1fr;
             }
 
-            .analysis-student-board-head {
-                display: none;
+            .analysis-student-filter {
+                grid-template-columns: 1fr;
             }
 
-            .analysis-student-row {
+            .analysis-mini-bars {
                 grid-template-columns: 1fr;
-                min-height: 0;
+            }
+
+            .analysis-filter-title,
+            .analysis-filter-stats {
+                grid-column: auto;
+            }
+
+            .analysis-filter-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
             .analysis-severity-row {
@@ -1263,6 +1592,24 @@
                 </div>
 
                 <div class="analysis-actions">
+                    <x-filament::button
+                        tag="a"
+                        :href="$this->getPdfExportUrl()"
+                        color="danger"
+                        size="sm"
+                        icon="heroicon-o-document-arrow-down"
+                    >
+                        Export PDF
+                    </x-filament::button>
+                    <x-filament::button
+                        tag="a"
+                        :href="$this->getExcelExportUrl()"
+                        color="success"
+                        size="sm"
+                        icon="heroicon-o-table-cells"
+                    >
+                        Export Excel
+                    </x-filament::button>
                     <x-filament::button
                         color="gray"
                         size="sm"
@@ -1520,139 +1867,240 @@
                 @endif
             </section>
 
-            <section class="analysis-panel analysis-panel--violet">
+            <section
+                class="analysis-panel analysis-panel--violet"
+                x-data="{
+                    query: '',
+                    risk: 'all',
+                    data: 'all',
+                    matches(row) {
+                        const text = row.dataset.search || '';
+                        const risk = row.dataset.risk || 'none';
+                        const alerts = Number(row.dataset.alerts || 0);
+                        const moodCount = Number(row.dataset.moodCount || 0);
+                        const screeningCount = Number(row.dataset.screeningCount || 0);
+                        const q = this.query.trim().toLowerCase();
+                        const queryOk = q === '' || text.includes(q);
+                        const riskOk = this.risk === 'all' || risk === this.risk;
+                        const dataOk = this.data === 'all'
+                            || (this.data === 'alert' && alerts > 0)
+                            || (this.data === 'mood' && moodCount > 0)
+                            || (this.data === 'screening' && screeningCount > 0)
+                            || (this.data === 'incomplete' && (moodCount === 0 || screeningCount === 0));
+
+                        return queryOk && riskOk && dataOk;
+                    },
+                }"
+            >
                 <div class="analysis-section-heading">
                     <div>
                         <h2>Grafik Per Siswa</h2>
-                        <p>Ringkasan setiap siswa: streak login, mood rata-rata, skor screening terbaru, dan alert aktif.</p>
+                        <p>Satu tabel gabungan untuk mencari, memfilter, dan mengecek grafik ringkas setiap siswa.</p>
                     </div>
                     <span class="analysis-heading-count">{{ $studentCharts->count() }} siswa</span>
                 </div>
 
                 @if ($studentCharts->isEmpty())
-                    <div class="analysis-empty">Belum ada siswa pada scope ini.</div>
-                @else
-                    <div class="analysis-student-board">
-                        <div class="analysis-student-board-head" aria-hidden="true">
-                            <span>Siswa</span>
-                            <span>Grafik ringkas</span>
-                            <span>Status</span>
-                        </div>
-
-                        <div class="analysis-student-list">
-                            @foreach ($studentCharts as $student)
-                                <article class="analysis-student-row">
-                                    <div class="analysis-student-identity">
-                                        <span class="analysis-avatar">{{ $student['initials'] }}</span>
-                                        <div class="analysis-student-copy">
-                                            <span class="analysis-student-name">{{ $student['name'] }}</span>
-                                            <span class="analysis-student-meta">{{ $student['classroom'] }} - {{ $student['email'] }}</span>
-                                            <div class="analysis-student-metrics">
-                                                <span class="analysis-student-metric"><strong>{{ $student['streak_days'] }}</strong>hari streak</span>
-                                                <span class="analysis-student-metric"><strong>{{ $student['mood_count'] }}</strong>mood</span>
-                                                <span class="analysis-student-metric"><strong>{{ $student['screening_count'] }}</strong>screening</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="analysis-mini-bars">
-                                        @foreach ([
-                                            ['label' => 'Streak login', 'value' => $student['streak_days'].' hari', 'percent' => $student['streak_percent'], 'color' => '#f59e0b'],
-                                            ['label' => 'Mood rata-rata', 'value' => $student['mood_average'] === null ? 'Belum ada' : number_format($student['mood_average'], 1).'/5', 'percent' => $student['mood_percent'], 'color' => '#10b981'],
-                                            ['label' => 'Skor screening', 'value' => $student['screening_total'] === null ? 'Belum ada' : $student['screening_total'].' poin', 'percent' => $student['screening_percent'], 'color' => '#0ea5e9'],
-                                        ] as $bar)
-                                            <div class="analysis-bar-row">
-                                                <div class="analysis-bar-top">
-                                                    <span class="analysis-bar-label">
-                                                        <span>{{ $bar['label'] }}</span>
-                                                    </span>
-                                                    <span class="analysis-bar-value">{{ $bar['value'] }}</span>
-                                                </div>
-                                                <div class="analysis-bar-track">
-                                                    <span
-                                                        class="analysis-bar-fill"
-                                                        style="--analysis-width: {{ $bar['percent'] }}%; --analysis-color: {{ $bar['color'] }};"
-                                                    ></span>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-
-                                    <div class="analysis-student-status">
-                                        <span @class(['analysis-severity', 'analysis-severity--'.$student['severity_key'] => filled($student['severity_key'])])>
-                                            {{ $student['severity_label'] }}
-                                        </span>
-                                        <span class="analysis-student-foot">Mood: {{ $student['latest_mood'] }}</span>
-                                        <span class="analysis-student-foot">Screening: {{ $student['latest_screening_at'] }}</span>
-                                        <span class="analysis-student-foot">Alert aktif: {{ $student['active_alerts'] }}</span>
-                                    </div>
-                                </article>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-            </section>
-
-            <section class="analysis-panel analysis-panel--emerald">
-                <div class="analysis-section-heading">
-                    <div>
-                        <h2>Data Detail Siswa</h2>
-                        <p>Tabel ringkas untuk mengecek data numerik di balik grafik persiswa.</p>
-                    </div>
-                    <span class="analysis-heading-count">{{ $studentCharts->count() }} baris</span>
-                </div>
-
-                @if ($studentCharts->isEmpty())
                     <div class="analysis-empty">Belum ada data siswa untuk ditampilkan.</div>
                 @else
-                    <div class="analysis-table-wrap">
-                        <table class="analysis-table">
-                            <thead>
-                                <tr>
-                                    <th>Siswa</th>
-                                    <th>Kelas</th>
-                                    <th>Streak</th>
-                                    <th>Mood</th>
-                                    <th>Energi/Stres</th>
-                                    <th>Screening</th>
-                                    <th>Risiko</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($studentCharts as $student)
+                    <div class="analysis-student-workspace">
+                        <aside class="analysis-student-filter">
+                            <div class="analysis-filter-title">Filter siswa</div>
+
+                            <div class="analysis-filter-field">
+                                <label for="student-analysis-search">Cari</label>
+                                <input id="student-analysis-search" type="search" x-model.debounce.150ms="query" placeholder="Nama, email, kelas">
+                            </div>
+
+                            <div class="analysis-filter-field">
+                                <label for="student-analysis-risk">Risiko</label>
+                                <select id="student-analysis-risk" x-model="risk">
+                                    <option value="all">Semua risiko</option>
+                                    <option value="normal">Normal</option>
+                                    <option value="mild">Ringan</option>
+                                    <option value="moderate">Sedang</option>
+                                    <option value="severe">Berat</option>
+                                    <option value="extremely_severe">Sangat berat</option>
+                                    <option value="none">Belum ada</option>
+                                </select>
+                            </div>
+
+                            <div class="analysis-filter-field">
+                                <label for="student-analysis-data">Data</label>
+                                <select id="student-analysis-data" x-model="data">
+                                    <option value="all">Semua data</option>
+                                    <option value="alert">Ada alert aktif</option>
+                                    <option value="mood">Ada mood</option>
+                                    <option value="screening">Ada screening</option>
+                                    <option value="incomplete">Data belum lengkap</option>
+                                </select>
+                            </div>
+
+                            <div class="analysis-filter-stats">
+                                <div class="analysis-filter-stat">
+                                    <strong>{{ $studentCharts->count() }}</strong>
+                                    <span>Siswa</span>
+                                </div>
+                                <div class="analysis-filter-stat">
+                                    <strong>{{ $studentsWithMood }}</strong>
+                                    <span>Mood</span>
+                                </div>
+                                <div class="analysis-filter-stat">
+                                    <strong>{{ $studentsWithScreening }}</strong>
+                                    <span>Screening</span>
+                                </div>
+                                <div class="analysis-filter-stat">
+                                    <strong>{{ $studentsWithActiveAlerts }}</strong>
+                                    <span>Alert</span>
+                                </div>
+                            </div>
+                        </aside>
+
+                        <div class="analysis-table-wrap">
+                            <table class="analysis-table">
+                                <thead>
                                     <tr>
-                                        <td>
-                                            <strong>{{ $student['name'] }}</strong><br>
-                                            <span class="analysis-student-meta">{{ $student['email'] }}</span>
-                                        </td>
-                                        <td>{{ $student['classroom'] }}</td>
-                                        <td>
-                                            <span class="analysis-table-kicker">{{ $student['streak_days'] }} hari</span><br>
-                                            <span class="analysis-student-meta">{{ $student['last_activity'] }}</span>
-                                        </td>
-                                        <td>
-                                            {{ $student['mood_average'] === null ? '-' : number_format($student['mood_average'], 1).'/5' }}<br>
-                                            <span class="analysis-student-meta">{{ $student['mood_count'] }} check-in</span>
-                                        </td>
-                                        <td>
-                                            Energi {{ $student['energy_average'] === null ? '-' : number_format($student['energy_average'], 1) }}<br>
-                                            Stres {{ $student['stress_average'] === null ? '-' : number_format($student['stress_average'], 1) }}
-                                        </td>
-                                        <td>
-                                            {{ $student['screening_total'] === null ? '-' : $student['screening_total'].' poin' }}<br>
-                                            <span class="analysis-student-meta">{{ $student['screening_count'] }} hasil</span>
-                                        </td>
-                                        <td>
-                                            <span @class(['analysis-severity', 'analysis-severity--'.$student['severity_key'] => filled($student['severity_key'])])>
-                                                {{ $student['severity_label'] }}
-                                            </span>
-                                            <br>
-                                            <span class="analysis-student-meta">{{ $student['active_alerts'] }} alert aktif</span>
-                                        </td>
+                                        <th class="analysis-table-sticky">Siswa</th>
+                                        <th class="analysis-table-summary">Ringkasan</th>
+                                        <th class="analysis-table-chart">Line grafik</th>
+                                        <th class="analysis-table-status">Detail & status</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach ($studentCharts as $student)
+                                        @php
+                                            $hasMoodTrend = $student['mood_trend']['count'] > 0;
+                                            $hasScreeningTrend = $student['screening_trend']['count'] > 0;
+                                            $studentSearch = mb_strtolower(implode(' ', [
+                                                $student['name'],
+                                                $student['email'],
+                                                $student['classroom'],
+                                                $student['severity_label'],
+                                                $student['latest_mood'],
+                                            ]));
+                                        @endphp
+
+                                        <tr
+                                            data-student-row
+                                            data-search="{{ $studentSearch }}"
+                                            data-risk="{{ $student['severity_key'] ?: 'none' }}"
+                                            data-alerts="{{ $student['active_alerts'] }}"
+                                            data-mood-count="{{ $student['mood_count'] }}"
+                                            data-screening-count="{{ $student['screening_count'] }}"
+                                            x-show="matches($el)"
+                                        >
+                                            <td class="analysis-table-sticky">
+                                                <div class="analysis-student-identity">
+                                                    <span class="analysis-avatar">{{ $student['initials'] }}</span>
+                                                    <div class="analysis-student-copy">
+                                                        <span class="analysis-student-name">{{ $student['name'] }}</span>
+                                                        <span class="analysis-student-meta">{{ $student['classroom'] }} - {{ $student['email'] }}</span>
+                                                        <div class="analysis-student-metrics">
+                                                            <span class="analysis-student-metric"><strong>{{ $student['streak_days'] }}</strong>hari</span>
+                                                            <span class="analysis-student-metric"><strong>{{ $student['mood_count'] }}</strong>mood</span>
+                                                            <span class="analysis-student-metric"><strong>{{ $student['screening_count'] }}</strong>screening</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="analysis-mini-bars">
+                                                    @foreach ([
+                                                        ['label' => 'Streak', 'value' => $student['streak_days'].' hari', 'percent' => $student['streak_percent'], 'color' => '#f59e0b'],
+                                                        ['label' => 'Mood', 'value' => $student['mood_average'] === null ? 'Belum ada' : number_format($student['mood_average'], 1).'/5', 'percent' => $student['mood_percent'], 'color' => '#10b981'],
+                                                        ['label' => 'Screening', 'value' => $student['screening_total'] === null ? 'Belum ada' : $student['screening_total'].' poin', 'percent' => $student['screening_percent'], 'color' => '#0ea5e9'],
+                                                    ] as $bar)
+                                                        <div class="analysis-bar-row">
+                                                            <div class="analysis-bar-top">
+                                                                <span class="analysis-bar-label">
+                                                                    <span>{{ $bar['label'] }}</span>
+                                                                </span>
+                                                                <span class="analysis-bar-value">{{ $bar['value'] }}</span>
+                                                            </div>
+                                                            <div class="analysis-bar-track">
+                                                                <span
+                                                                    class="analysis-bar-fill"
+                                                                    style="--analysis-width: {{ $bar['percent'] }}%; --analysis-color: {{ $bar['color'] }};"
+                                                                ></span>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="analysis-student-line">
+                                                    <div class="analysis-line-head">
+                                                        <span class="analysis-line-title">Tren siswa</span>
+                                                        <span class="analysis-line-caption">
+                                                            {{ $hasMoodTrend || $hasScreeningTrend ? '8 data terbaru' : 'Belum ada tren' }}
+                                                        </span>
+                                                    </div>
+
+                                                    @if ($hasMoodTrend || $hasScreeningTrend)
+                                                        <svg class="analysis-line-svg" viewBox="0 0 220 58" role="img" aria-label="Line grafik mood dan screening {{ $student['name'] }}">
+                                                            <line class="analysis-line-grid" x1="6" y1="52" x2="214" y2="52"></line>
+                                                            <line class="analysis-line-grid" x1="6" y1="29" x2="214" y2="29"></line>
+                                                            <line class="analysis-line-grid" x1="6" y1="6" x2="214" y2="6"></line>
+
+                                                            @if ($student['mood_trend']['count'] > 1)
+                                                                <polyline class="analysis-line-path analysis-line-path--mood" points="{{ $student['mood_trend']['points'] }}"></polyline>
+                                                            @endif
+
+                                                            @foreach ($student['mood_trend']['dots'] as $dot)
+                                                                <circle class="analysis-line-dot analysis-line-dot--mood" cx="{{ $dot['x'] }}" cy="{{ $dot['y'] }}" r="3">
+                                                                    <title>Mood {{ $dot['label'] }}: {{ $dot['value'] }}</title>
+                                                                </circle>
+                                                            @endforeach
+
+                                                            @if ($student['screening_trend']['count'] > 1)
+                                                                <polyline class="analysis-line-path analysis-line-path--screening" points="{{ $student['screening_trend']['points'] }}"></polyline>
+                                                            @endif
+
+                                                            @foreach ($student['screening_trend']['dots'] as $dot)
+                                                                <circle class="analysis-line-dot analysis-line-dot--screening" cx="{{ $dot['x'] }}" cy="{{ $dot['y'] }}" r="3">
+                                                                    <title>Screening {{ $dot['label'] }}: {{ $dot['value'] }}</title>
+                                                                </circle>
+                                                            @endforeach
+                                                        </svg>
+
+                                                        <div class="analysis-line-legend">
+                                                            <span><i data-line="mood"></i>Mood</span>
+                                                            <span><i data-line="screening"></i>Screening</span>
+                                                        </div>
+                                                    @else
+                                                        <div class="analysis-line-empty">Belum ada tren</div>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="analysis-student-status">
+                                                    <span @class(['analysis-severity', 'analysis-severity--'.$student['severity_key'] => filled($student['severity_key'])])>
+                                                        {{ $student['severity_label'] }}
+                                                    </span>
+                                                    <div class="analysis-status-grid">
+                                                        <span class="analysis-student-foot">
+                                                            Mood {{ $student['mood_average'] === null ? '-' : number_format($student['mood_average'], 1).'/5' }}
+                                                            - {{ $student['mood_count'] }}x
+                                                        </span>
+                                                        <span class="analysis-student-foot">Terakhir: {{ $student['latest_mood'] }}</span>
+                                                        <span class="analysis-student-foot">
+                                                            Energi {{ $student['energy_average'] === null ? '-' : number_format($student['energy_average'], 1) }}
+                                                            / Stres {{ $student['stress_average'] === null ? '-' : number_format($student['stress_average'], 1) }}
+                                                        </span>
+                                                        <span class="analysis-student-foot">
+                                                            Screening {{ $student['screening_total'] === null ? '-' : $student['screening_total'].' poin' }}
+                                                            - {{ $student['screening_count'] }}x
+                                                        </span>
+                                                        <span class="analysis-student-foot">Tes: {{ $student['latest_screening_at'] }}</span>
+                                                        <span class="analysis-student-foot">Alert {{ $student['active_alerts'] }} - Login {{ $student['last_activity'] }}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 @endif
             </section>

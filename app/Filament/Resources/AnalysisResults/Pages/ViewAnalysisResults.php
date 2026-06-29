@@ -14,6 +14,7 @@ use Filament\Resources\Pages\Page;
 use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Url;
@@ -31,6 +32,14 @@ class ViewAnalysisResults extends Page
     private const DASS_MAX_TOTAL = 126;
 
     private const STREAK_TARGET_DAYS = 30;
+
+    private const STUDENT_TREND_LIMIT = 8;
+
+    private const SPARKLINE_WIDTH = 220;
+
+    private const SPARKLINE_HEIGHT = 58;
+
+    private const SPARKLINE_PADDING = 6;
 
     private const SEVERITY_ORDER = [
         'normal' => 1,
@@ -182,6 +191,16 @@ class ViewAnalysisResults extends Page
             ->value('name');
 
         return $classroomName ? 'Kelas '.$classroomName : 'Kelas tidak ditemukan';
+    }
+
+    public function getPdfExportUrl(): string
+    {
+        return route('admin.analysis-results.school.export.pdf', $this->exportRouteParameters());
+    }
+
+    public function getExcelExportUrl(): string
+    {
+        return route('admin.analysis-results.school.export.excel', $this->exportRouteParameters());
     }
 
     public function selectSchool(int $schoolId): void
@@ -390,7 +409,58 @@ class ViewAnalysisResults extends Page
             ->groupBy('user_id')
             ->pluck('aggregate_count', 'user_id');
 
-        return $students->map(function (User $student) use ($moodAverages, $latestMoods, $latestScreenings, $screeningCounts, $activeAlertCounts): array {
+        $moodTrends = MoodEntry::query()
+            ->join('mood_options', 'mood_entries.mood_option_id', '=', 'mood_options.id')
+            ->whereIn('mood_entries.user_id', $studentIds)
+            ->orderBy('mood_entries.entry_date')
+            ->orderBy('mood_entries.id')
+            ->get([
+                'mood_entries.user_id',
+                'mood_entries.entry_date',
+                'mood_options.score',
+            ])
+            ->groupBy('user_id')
+            ->map(fn (Collection $entries): array => $this->trendData(
+                $entries
+                    ->slice(max(0, $entries->count() - self::STUDENT_TREND_LIMIT))
+                    ->values()
+                    ->map(fn (MoodEntry $entry): array => [
+                        'label' => Carbon::parse($entry->entry_date)->translatedFormat('d M'),
+                        'value' => (float) $entry->score,
+                        'display' => number_format((float) $entry->score, 1).'/5',
+                    ]),
+                5
+            ));
+
+        $screeningTrends = ScreeningResult::query()
+            ->whereIn('user_id', $studentIds)
+            ->orderBy('taken_at')
+            ->orderBy('id')
+            ->get([
+                'user_id',
+                'taken_at',
+                'depression_score',
+                'anxiety_score',
+                'stress_score',
+            ])
+            ->groupBy('user_id')
+            ->map(fn (Collection $entries): array => $this->trendData(
+                $entries
+                    ->slice(max(0, $entries->count() - self::STUDENT_TREND_LIMIT))
+                    ->values()
+                    ->map(function (ScreeningResult $entry): array {
+                        $total = $entry->depression_score + $entry->anxiety_score + $entry->stress_score;
+
+                        return [
+                            'label' => $entry->taken_at->translatedFormat('d M'),
+                            'value' => (float) $total,
+                            'display' => $total.' poin',
+                        ];
+                    }),
+                self::DASS_MAX_TOTAL
+            ));
+
+        return $students->map(function (User $student) use ($moodAverages, $latestMoods, $latestScreenings, $screeningCounts, $activeAlertCounts, $moodTrends, $screeningTrends): array {
             $moodAverage = $moodAverages->get($student->id);
             $latestMood = $latestMoods->get($student->id);
             $latestScreening = $latestScreenings->get($student->id);
@@ -427,6 +497,8 @@ class ViewAnalysisResults extends Page
                 'severity_key' => $worstSeverity,
                 'severity_label' => $worstSeverity ? SchoolScreeningReportData::severityLabel($worstSeverity) : 'Belum ada',
                 'active_alerts' => (int) ($activeAlertCounts[$student->id] ?? 0),
+                'mood_trend' => $moodTrends->get($student->id, $this->emptyTrend()),
+                'screening_trend' => $screeningTrends->get($student->id, $this->emptyTrend()),
             ];
         });
     }
@@ -603,6 +675,14 @@ class ViewAnalysisResults extends Page
             : null;
     }
 
+    private function exportRouteParameters(): array
+    {
+        return [
+            'school' => $this->getSelectedSchool(),
+            'class' => $this->selectedClassroomKey,
+        ];
+    }
+
     private function initials(string $name): string
     {
         $initials = collect(preg_split('/\s+/', trim($name)) ?: [])
@@ -645,5 +725,54 @@ class ViewAnalysisResults extends Page
         }
 
         return (int) max(0, min(100, round(($value / $max) * 100)));
+    }
+
+    private function trendData(Collection $values, float|int $max): array
+    {
+        if ($values->isEmpty()) {
+            return $this->emptyTrend();
+        }
+
+        $count = $values->count();
+        $width = self::SPARKLINE_WIDTH;
+        $height = self::SPARKLINE_HEIGHT;
+        $padding = self::SPARKLINE_PADDING;
+        $usableWidth = $width - ($padding * 2);
+        $usableHeight = $height - ($padding * 2);
+
+        $dots = $values
+            ->values()
+            ->map(function (array $point, int $index) use ($count, $width, $height, $padding, $usableWidth, $usableHeight, $max): array {
+                $percent = $this->percent((float) $point['value'], $max);
+                $x = $count === 1
+                    ? $width / 2
+                    : $padding + (($usableWidth / ($count - 1)) * $index);
+                $y = $height - $padding - (($percent / 100) * $usableHeight);
+
+                return [
+                    'x' => round($x, 1),
+                    'y' => round($y, 1),
+                    'label' => $point['label'],
+                    'value' => $point['display'],
+                ];
+            })
+            ->all();
+
+        return [
+            'count' => $count,
+            'points' => collect($dots)
+                ->map(fn (array $dot): string => $dot['x'].','.$dot['y'])
+                ->implode(' '),
+            'dots' => $dots,
+        ];
+    }
+
+    private function emptyTrend(): array
+    {
+        return [
+            'count' => 0,
+            'points' => '',
+            'dots' => [],
+        ];
     }
 }
